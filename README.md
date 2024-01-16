@@ -1,4 +1,4 @@
-### This is Demo backend.
+### This is CV Builder backend
 
 ```bash
 # development
