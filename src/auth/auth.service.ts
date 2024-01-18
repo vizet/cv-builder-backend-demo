@@ -1,6 +1,11 @@
-import {BadRequestException, Injectable, UnauthorizedException} from "@nestjs/common"
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException
+} from "@nestjs/common"
 import {JwtService} from "@nestjs/jwt"
-import {UserDocument} from "src/users/users.schema"
+import {User, UserDocument} from "src/users/users.schema"
 import {UsersService} from "src/users/users.service"
 import * as bcrypt from "bcrypt"
 
@@ -23,7 +28,7 @@ export class AuthService {
       throw new UnauthorizedException("Invalid email or password")
     }
 
-    const passwordValid = await bcrypt.compare(password, user.password)
+    const passwordValid = await bcrypt.compare(password, user.password || "")
 
     if (!passwordValid) {
       throw new UnauthorizedException("Invalid email or password")
@@ -67,17 +72,35 @@ export class AuthService {
     }
   }
 
-  async getProfile(userFromToken: Pick<UserDocument, "_id" | "email">) {
-    if (!userFromToken.email) {
-      throw new UnauthorizedException()
+  async loginGoogle(userData: {
+    email: User["email"]
+  } & Partial<User>) {
+    try {
+      let user = await this.getProfile({
+        email: userData.email
+      })
+
+      if (!user) {
+        user = await this.usersService.create(userData)
+      }
+
+      return {
+        accessToken: this.jwtService.sign({
+          _id: user._id,
+          email: user.email
+        }),
+        ...user
+      }
+    } catch (err) {
+      throw new InternalServerErrorException("Something went wrong")
+    }
+  }
+
+  async getProfile(input: Pick<UserDocument, "email">) {
+    if (!input?.email) {
+      throw new UnauthorizedException("Unable to find user")
     }
 
-    const user = await this.usersService.findOne(userFromToken.email)
-
-    if (!user) {
-      throw new UnauthorizedException()
-    }
-
-    return user
+    return await this.usersService.findOne(input.email)
   }
 }

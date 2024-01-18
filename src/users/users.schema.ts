@@ -12,8 +12,25 @@ export class User {
   })
   email: string
 
-  @Prop()
-  password: string
+  @Prop({
+    default: null
+  })
+  password: string | null
+
+  @Prop({
+    default: ""
+  })
+  avatar: string
+
+  @Prop({
+    default: ""
+  })
+  firstName: string
+
+  @Prop({
+    default: ""
+  })
+  lastName: string
 }
 
 export const UsersSchema = SchemaFactory.createForClass(User)

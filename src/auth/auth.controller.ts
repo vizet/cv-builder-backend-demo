@@ -7,7 +7,7 @@ import {
   Body
 } from "@nestjs/common"
 import {UserDocument} from "src/users/users.schema"
-import {LocalAuthGuard} from "./auth.guard"
+import {GoogleAuthGuard, LocalAuthGuard} from "./auth.guard"
 import {Public} from "./auth.decorators"
 import {AuthService} from "./auth.service"
 
@@ -30,8 +30,21 @@ export class AuthController {
     return this.authService.login(req.user)
   }
 
+  @Public()
+  @UseGuards(GoogleAuthGuard)
+  @Post("login-google")
+  async loginGoogle(@Request() req) {
+    return this.authService.loginGoogle(req.user)
+  }
+
   @Get("profile")
-  getProfile(@Request() req) {
-    return this.authService.getProfile(req.user)
+  async getProfile(@Request() req) {
+    const user = await this.authService.getProfile(req.user)
+
+    if (!user) {
+      return null
+    }
+
+    return user
   }
 }

@@ -1,7 +1,11 @@
-import {BadRequestException, ConflictException, Injectable} from "@nestjs/common"
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable
+} from "@nestjs/common"
 import {InjectModel} from "@nestjs/mongoose"
 import {Model} from "mongoose"
-import {User, UserDocument} from "./users.schema"
+import {User} from "./users.schema"
 
 @Injectable()
 export class UsersService {
@@ -9,12 +13,21 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<User>
   ) {}
 
-  async create(input: Pick<UserDocument, "email" | "password">): Promise<UserDocument | undefined> {
+  async create(
+    input: {
+      email: User["email"]
+    } & Partial<User>
+  ) {
     try {
-      return await new this.userModel({
+      const newUser = await new this.userModel({
         email: input.email,
-        password: input.password
+        password: input.password,
+        avatar: input.avatar,
+        firstName: input.firstName,
+        lastName: input.lastName
       }).save()
+
+      return newUser.toObject()
     } catch (err) {
       if (err.code === 11000) {
         throw new ConflictException("User already exists")
@@ -29,7 +42,7 @@ export class UsersService {
     options?: {
       pickPassword?: boolean
     }
-  ): Promise<User | null> {
+  ) {
     const result = await this.userModel.findOne({
       "email": email
     }).select(!options?.pickPassword ? ["-password"] : [])
