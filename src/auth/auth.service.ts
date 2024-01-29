@@ -9,6 +9,11 @@ import {User, UserDocument} from "src/users/users.schema"
 import {UsersService} from "src/users/users.service"
 import * as bcrypt from "bcrypt"
 
+export type UserFromToken = {
+  _id: string
+  email: string
+}
+
 @Injectable()
 export class AuthService {
   constructor(

@@ -7,6 +7,7 @@ import config from "src/config"
 import {AppController} from "src/app.controller"
 import {AppService} from "src/app.service"
 import {AuthModule} from "src/auth/auth.module"
+import {ResumeModule} from "src/resume/resume.module"
 import {UsersModule} from "src/users/users.module"
 
 @Module({
@@ -23,7 +24,8 @@ import {UsersModule} from "src/users/users.module"
       })
     }),
     AuthModule,
-    UsersModule
+    UsersModule,
+    ResumeModule
   ],
   controllers: [AppController],
   providers: [
