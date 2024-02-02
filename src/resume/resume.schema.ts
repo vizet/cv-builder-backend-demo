@@ -24,6 +24,11 @@ export class Resume {
   author: Types.ObjectId
 
   @Prop({
+    default: ""
+  })
+  preview: string
+
+  @Prop({
     type: Object
   })
   data: {

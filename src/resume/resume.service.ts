@@ -22,6 +22,7 @@ export class ResumeService {
     try {
       const newResume = await new this.resumeModel({
         title: input.title,
+        preview: "",
         author: input.author,
         data: input.data
       }).save()
@@ -37,6 +38,8 @@ export class ResumeService {
   ) {
     const result = await this.resumeModel.find({
       "author": userId
+    }).sort({
+      "dateUpdated": -1
     })
 
     return result || null
@@ -66,8 +69,9 @@ export class ResumeService {
   async updateById(
     id: string,
     input: {
-      title: Resume["title"]
       author: string
+      title?: Resume["title"]
+      preview?: Resume["preview"]
       data?: Partial<Resume["data"]>
     }
   ) {
@@ -81,7 +85,13 @@ export class ResumeService {
         throw new UnauthorizedException()
       }
 
-      resume.title = input.title
+      if (typeof input.title === "string") {
+        resume.title = input.title
+      }
+
+      if (input.preview) {
+        resume.preview = input.preview
+      }
 
       if (input.data) {
         resume.data = {

@@ -8,6 +8,7 @@ import {
   Request
 } from "@nestjs/common"
 import {UserFromToken} from "src/auth/auth.service"
+import {Resume} from "src/resume/resume.schema"
 import {ResumeService} from "./resume.service"
 
 @Controller("resume")
@@ -47,10 +48,11 @@ export class ResumeController {
   async updateById(
     @Request() req: {user: UserFromToken},
     @Param("id") id: string,
-    @Body() body: Omit<Parameters<typeof this.resumeService.create>[0], "author">
+    @Body() body: Omit<Parameters<typeof this.resumeService.create>[0] & Pick<Resume, "preview">, "author">
   ) {
     return this.resumeService.updateById(id, {
       title: body.title,
+      preview: body.preview,
       author: req.user._id,
       data: body.data
     })
