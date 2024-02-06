@@ -15,6 +15,7 @@ export class ResumeService {
   async create(
     input: {
       title: Resume["title"]
+      preview?: Resume["preview"]
       author: string
       data: Partial<Resume["data"]>
     }
@@ -22,7 +23,7 @@ export class ResumeService {
     try {
       const newResume = await new this.resumeModel({
         title: input.title,
-        preview: "",
+        preview: input.preview,
         author: input.author,
         data: input.data
       }).save()

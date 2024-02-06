@@ -4,6 +4,13 @@ import {HydratedDocument} from "mongoose"
 export type UserDocument = HydratedDocument<User>
 
 @Schema({
+  id: false,
+  toJSON: {
+    virtuals: true
+  },
+  toObject: {
+    virtuals: true
+  },
   versionKey: false
 })
 export class User {
@@ -31,6 +38,22 @@ export class User {
     default: ""
   })
   lastName: string
+
+  fullName: string
 }
 
-export const UsersSchema = SchemaFactory.createForClass(User)
+const UsersSchema = SchemaFactory.createForClass(User)
+
+UsersSchema.virtual("fullName").get(function () {
+  if (this.firstName || this.lastName) {
+    return `${this.firstName} ${this.lastName}`
+  } else if (this.firstName) {
+    return this.firstName
+  } else if (this.lastName) {
+    return this.lastName
+  } else {
+    return ""
+  }
+})
+
+export {UsersSchema}

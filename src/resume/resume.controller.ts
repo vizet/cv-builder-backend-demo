@@ -24,6 +24,7 @@ export class ResumeController {
   ) {
     return this.resumeService.create({
       title: body.title,
+      preview: body.preview,
       author: req.user._id,
       data: body.data
     })
