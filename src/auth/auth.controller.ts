@@ -4,12 +4,13 @@ import {
   Post,
   Get,
   UseGuards,
-  Body
+  Body,
+  Put
 } from "@nestjs/common"
-import {UserDocument} from "src/users/users.schema"
+import {User, UserDocument} from "src/users/users.schema"
 import {GoogleAuthGuard, LocalAuthGuard} from "./auth.guard"
 import {Public} from "./auth.decorators"
-import {AuthService} from "./auth.service"
+import {AuthService, UserFromToken} from "./auth.service"
 
 @Controller("auth")
 export class AuthController {
@@ -38,13 +39,23 @@ export class AuthController {
   }
 
   @Get("profile")
-  async getProfile(@Request() req) {
-    const user = await this.authService.getProfile(req.user)
+  async getProfile(@Request() req: {user: UserFromToken}) {
+    const user = await this.authService.getProfile(req.user._id)
 
     if (!user) {
       return null
     }
 
     return user
+  }
+
+  @Put("profile")
+  async updateProfile(
+    @Request() req: {user: UserFromToken},
+    @Body() body: Partial<User & {
+      newPassword: string
+    }>
+  ) {
+    return await this.authService.updateProfile(req.user._id, body)
   }
 }

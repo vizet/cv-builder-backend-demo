@@ -40,6 +40,11 @@ export class User {
   lastName: string
 
   fullName: string
+
+  @Prop({
+    default: false
+  })
+  emailVerified: boolean
 }
 
 const UsersSchema = SchemaFactory.createForClass(User)

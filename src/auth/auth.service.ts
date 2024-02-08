@@ -25,7 +25,7 @@ export class AuthService {
     email: string,
     password: string
   ): Promise<any> {
-    const user = await this.usersService.findOne(email, {
+    const user = await this.usersService.findByEmail(email, {
       pickPassword: true
     })
 
@@ -81,12 +81,13 @@ export class AuthService {
     email: User["email"]
   } & Partial<User>) {
     try {
-      let user = await this.getProfile({
-        email: userData.email
-      })
+      let user = await this.usersService.findByEmail(userData.email)
 
       if (!user) {
-        user = await this.usersService.create(userData)
+        user = await this.usersService.create({
+          ...userData,
+          emailVerified: true
+        })
       }
 
       return {
@@ -101,11 +102,20 @@ export class AuthService {
     }
   }
 
-  async getProfile(input: Pick<UserDocument, "email">) {
-    if (!input?.email) {
+  async getProfile(userId: string) {
+    if (!userId) {
       throw new UnauthorizedException("Unable to find user")
     }
 
-    return await this.usersService.findOne(input.email)
+    return await this.usersService.findById(userId)
+  }
+
+  async updateProfile(
+    userId: string,
+    input: Partial<User & {
+      newPassword: string
+    }>
+  ) {
+    return await this.usersService.updateOne(userId, input)
   }
 }
