@@ -105,8 +105,6 @@ export class UsersService {
     try {
       await user.save()
 
-      console.log(">>>", user.toObject())
-
       return user.toObject()
     } catch (err) {
       throw new BadRequestException("Something went wrong")
