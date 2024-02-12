@@ -1,17 +1,26 @@
 import {
   BadRequestException,
   ConflictException,
-  Injectable, UnauthorizedException
+  forwardRef,
+  Inject,
+  Injectable,
+  UnauthorizedException
 } from "@nestjs/common"
 import {InjectModel} from "@nestjs/mongoose"
+import {omit} from "lodash"
 import {Model} from "mongoose"
-import {User} from "./users.schema"
+import {AuthService} from "src/auth/auth.service"
+import {CDNService} from "src/cdn/cdn.service"
+import {User, UserDocument, UserObject} from "./users.schema"
 import * as bcrypt from "bcrypt"
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>
+    @InjectModel(User.name) private userModel: Model<User>,
+    @Inject(forwardRef(() => AuthService))
+    private auth: AuthService,
+    private cdn: CDNService
   ) {}
 
   async create(
@@ -20,16 +29,33 @@ export class UsersService {
     } & Partial<User>
   ) {
     try {
+      const getEmailVerification = async () => {
+        if (input.emailVerification) {
+          return input.emailVerification
+        } else {
+          const verificationData = await this.auth.createEmailVerification(input.email)
+
+          return {
+            isVerified: false,
+            ...verificationData
+          }
+        }
+      }
+
       const newUser = await new this.userModel({
         email: input.email,
-        emailVerified: input.emailVerified,
+        emailVerification: await getEmailVerification(),
         password: input.password,
         avatar: input.avatar,
         firstName: input.firstName,
         lastName: input.lastName
       }).save()
 
-      return newUser.toObject()
+      return omit(newUser.toObject(), [
+        "emailVerification.token",
+        "emailVerification.tokenDateCreated",
+        "password"
+      ]) as UserObject
     } catch (err) {
       if (err.code === 11000) {
         throw new ConflictException("User already exists")
@@ -39,40 +65,72 @@ export class UsersService {
     }
   }
 
-  async findById(
+  async findOne<O extends boolean = true>(
+    input: {
+      userId: string | UserObject["_id"]
+    } | {
+      email: string
+    } | {
+      emailVerificationToken: string
+    },
+    options?: {
+      pickPassword?: boolean
+      pickEmailVerificationData?: boolean
+      object?: O
+    }
+  ): Promise<O extends true ? UserObject : UserDocument> {
+    const pickPrivateFields = []
+
+    if (options?.pickPassword) {
+      pickPrivateFields.push("+password")
+    }
+
+    if (options?.pickEmailVerificationData) {
+      pickPrivateFields.push(
+        "+emailVerification.token",
+        "+emailVerification.tokenDateCreated"
+      )
+    }
+
+    const query = "userId" in input ? {
+      "_id": input.userId
+    } : "email" in input ? {
+      "email": input.email
+    } : {
+      "emailVerification.token": input.emailVerificationToken
+    }
+
+    const result = await this.userModel.findOne(query).select(pickPrivateFields)
+
+    if (options?.object !== false) {
+      return result?.toObject() || null
+    } else {
+      return result || null
+    }
+  }
+
+  updateOne(
     userId: string,
-    options?: {
-      pickPassword?: boolean
-    }
+    input: any
   ) {
-    const result = await this.userModel.findOne({
+    return this.userModel.updateOne({
       "_id": userId
-    }).select(!options?.pickPassword ? ["-password"] : [])
-
-    return result?.toObject() || null
+    }, input)
   }
 
-  async findByEmail(
-    email: string,
-    options?: {
-      pickPassword?: boolean
-    }
-  ) {
-    const result = await this.userModel.findOne({
-      "email": email
-    }).select(!options?.pickPassword ? ["-password"] : [])
-
-    return result?.toObject() || null
-  }
-
-  async updateOne(
+  async updateProfile(
     userId: string,
     input: Partial<User & {
       newPassword: string
-    }>
+    }>,
+    avatar?: Express.Multer.File
   ) {
-    const user = await this.userModel.findOne({
-      "_id": userId
+    const user = await this.findOne({
+      userId
+    }, {
+      pickPassword: true,
+      pickEmailVerificationData: true,
+      object: false
     })
 
     if (!user) {
@@ -80,8 +138,13 @@ export class UsersService {
     }
 
     if ("email" in input && input.email !== user.email) {
+      const verificationData = await this.auth.createEmailVerification(input.email)
+
       user.email = input.email
-      user.emailVerified = false
+      user.emailVerification = {
+        isVerified: false,
+        ...verificationData
+      }
     }
 
     if ("newPassword" in input) {
@@ -98,14 +161,31 @@ export class UsersService {
       }
     }
 
+    if (avatar) {
+      if (user.avatar?.includes("imagedelivery.net")) {
+        await this.cdn.deleteImage(user.avatar)
+      }
+
+      user.avatar = await this.cdn.uploadImage(avatar)
+    } else if ("avatar" in input) {
+      if (!input.avatar && user.avatar.includes("imagedelivery.net")) {
+        await this.cdn.deleteImage(user.avatar)
+      }
+
+      user.avatar = input.avatar
+    }
+
     user.firstName = "firstName" in input ? input.firstName : user.firstName
     user.lastName = "lastName" in input ? input.lastName : user.lastName
-    user.avatar = "avatar" in input ? input.avatar : user.avatar
 
     try {
       await user.save()
 
-      return user.toObject()
+      return omit(user.toObject(), [
+        "emailVerification.token",
+        "emailVerification.tokenDateCreated",
+        "password"
+      ])
     } catch (err) {
       throw new BadRequestException("Something went wrong")
     }

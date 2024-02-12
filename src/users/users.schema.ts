@@ -1,7 +1,31 @@
 import {Prop, Schema, SchemaFactory} from "@nestjs/mongoose"
-import {HydratedDocument} from "mongoose"
+import {HydratedDocument, Types} from "mongoose"
 
 export type UserDocument = HydratedDocument<User>
+export type UserObject = User & {_id: Types.ObjectId}
+
+@Schema({
+  _id: false,
+  id: false
+})
+class EmailVerification {
+  @Prop({
+    default: false
+  })
+  isVerified: boolean
+
+  @Prop({
+    select: false,
+    default: ""
+  })
+  token: string | null
+
+  @Prop({
+    select: false,
+    default: null
+  })
+  tokenDateCreated: Date | null
+}
 
 @Schema({
   id: false,
@@ -19,7 +43,11 @@ export class User {
   })
   email: string
 
+  @Prop()
+  emailVerification: EmailVerification
+
   @Prop({
+    select: false,
     default: null
   })
   password: string | null
@@ -40,11 +68,6 @@ export class User {
   lastName: string
 
   fullName: string
-
-  @Prop({
-    default: false
-  })
-  emailVerified: boolean
 }
 
 const UsersSchema = SchemaFactory.createForClass(User)

@@ -1,11 +1,16 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException
 } from "@nestjs/common"
 import {JwtService} from "@nestjs/jwt"
-import {User, UserDocument} from "src/users/users.schema"
+import * as crypto from "crypto"
+import {omit} from "lodash"
+import {EmailService} from "src/email/email.service"
+import {User, UserDocument, UserObject} from "src/users/users.schema"
 import {UsersService} from "src/users/users.service"
 import * as bcrypt from "bcrypt"
 
@@ -17,15 +22,17 @@ export type UserFromToken = {
 @Injectable()
 export class AuthService {
   constructor(
+    @Inject(forwardRef(() => UsersService))
     private usersService: UsersService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private emailService: EmailService,
   ) {}
 
   async validateUser(
     email: string,
     password: string
   ): Promise<any> {
-    const user = await this.usersService.findByEmail(email, {
+    const user = await this.usersService.findOne({email}, {
       pickPassword: true
     })
 
@@ -39,12 +46,7 @@ export class AuthService {
       throw new UnauthorizedException("Invalid email or password")
     }
 
-    const {
-      password: pass,
-      ...result
-    } = user
-
-    return result
+    return omit(user, ["password"])
   }
 
   async signup(input: Pick<UserDocument, "email" | "password">) {
@@ -67,7 +69,7 @@ export class AuthService {
     }
   }
 
-  async login(user: UserDocument) {
+  async login(user: UserObject) {
     return {
       accessToken: this.jwtService.sign({
         _id: user._id,
@@ -81,12 +83,18 @@ export class AuthService {
     email: User["email"]
   } & Partial<User>) {
     try {
-      let user = await this.usersService.findByEmail(userData.email)
+      let user = await this.usersService.findOne({
+        email: userData.email
+      })
 
       if (!user) {
         user = await this.usersService.create({
           ...userData,
-          emailVerified: true
+          emailVerification: {
+            isVerified: true,
+            token: null,
+            tokenDateCreated: null
+          }
         })
       }
 
@@ -107,15 +115,87 @@ export class AuthService {
       throw new UnauthorizedException("Unable to find user")
     }
 
-    return await this.usersService.findById(userId)
+    return await this.usersService.findOne({userId})
   }
 
   async updateProfile(
     userId: string,
-    input: Partial<User & {
+    input?: Partial<User & {
       newPassword: string
-    }>
+    }>,
+    avatar?: Express.Multer.File
   ) {
-    return await this.usersService.updateOne(userId, input)
+    return await this.usersService.updateProfile(userId, input, avatar)
+  }
+
+  async createEmailVerification(email: UserObject["email"]) {
+    const tokenData = {
+      token: crypto.randomBytes(64).toString("hex"),
+      tokenDateCreated: new Date()
+    }
+
+    await this.emailService.sendVerificationEmail(email, tokenData.token)
+
+    return tokenData
+  }
+
+  async resendVerificationEmail(userId: string) {
+    const user = await this.usersService.findOne({userId}, {
+      pickEmailVerificationData: true
+    })
+
+    if (user.emailVerification.tokenDateCreated) {
+      const prevDate = new Date(user.emailVerification.tokenDateCreated).getTime()
+      const currentDate = new Date().getTime()
+
+      if (Math.floor((currentDate - prevDate) / 1000) < 60) {
+        throw new BadRequestException("Verification email has been already sent")
+      }
+    }
+
+    const data = await this.createEmailVerification(user.email)
+
+    await this.usersService.updateOne(userId, {
+      "$set": {
+        "emailVerification.token": data.token,
+        "emailVerification.tokenDateCreated": data.tokenDateCreated
+      }
+    })
+
+    return {
+      success: true
+    }
+  }
+
+  async verifyEmail(token: string) {
+    try {
+      if (!token) {
+        throw new UnauthorizedException("Invalid email or token")
+      }
+
+      const user = await this.usersService.findOne({
+        emailVerificationToken: token
+      })
+
+      if (!user) {
+        throw new UnauthorizedException("Invalid email or token")
+      } else {
+        await this.usersService.updateOne(user._id.toString(), {
+          "$set": {
+            "emailVerification": {
+              "isVerified": true,
+              "token": null,
+              "tokenDateCreated": null
+            }
+          }
+        })
+
+        return {
+          success: true
+        }
+      }
+    } catch {
+      throw new UnauthorizedException("Invalid email or token")
+    }
   }
 }
