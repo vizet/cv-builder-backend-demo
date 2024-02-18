@@ -134,7 +134,7 @@ export class AuthService {
       tokenDateCreated: new Date()
     }
 
-    await this.emailService.sendVerificationEmail(email, tokenData.token)
+    // await this.emailService.sendVerificationEmail(email, tokenData.token)
 
     return tokenData
   }

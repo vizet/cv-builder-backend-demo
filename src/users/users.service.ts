@@ -151,7 +151,7 @@ export class UsersService {
       let acceptable = true
 
       if (!!user.password) {
-        acceptable = await bcrypt.compare(input.newPassword, user.password)
+        acceptable = await bcrypt.compare(input.password, user.password)
       }
 
       if (!acceptable) {
