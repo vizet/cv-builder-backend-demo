@@ -10,6 +10,7 @@ import {JwtService} from "@nestjs/jwt"
 import * as crypto from "crypto"
 import {omit} from "lodash"
 import {EmailService} from "src/email/email.service"
+import {PaymentService} from "src/payment/payment.service"
 import {User, UserDocument, UserObject} from "src/users/users.schema"
 import {UsersService} from "src/users/users.service"
 import * as bcrypt from "bcrypt"
@@ -26,6 +27,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private emailService: EmailService,
+    private paymentService: PaymentService
   ) {}
 
   async validateUser(
@@ -115,7 +117,23 @@ export class AuthService {
       throw new UnauthorizedException("Unable to find user")
     }
 
-    return await this.usersService.findOne({userId})
+    const user = await this.usersService.findOne({userId}, {
+      pickSubscriptionData: true
+    })
+    let subscription: Partial<typeof user.subscription> = user.subscription
+
+    if (user.subscription.subscriptionId && user.subscription.isActive) {
+      subscription = {
+        isActive: await this.paymentService.checkSubscription(subscription.subscriptionId)
+      }
+    }
+
+    return {
+      ...user,
+      subscription: {
+        isActive: subscription.isActive
+      }
+    }
   }
 
   async updateProfile(

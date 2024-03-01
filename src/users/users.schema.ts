@@ -28,6 +28,23 @@ class EmailVerification {
 }
 
 @Schema({
+  _id: false,
+  id: false
+})
+class Subscription {
+  @Prop({
+    select: false,
+    default: ""
+  })
+  subscriptionId: string
+
+  @Prop({
+    default: false
+  })
+  isActive: boolean
+}
+
+@Schema({
   id: false,
   toJSON: {
     virtuals: true
@@ -51,6 +68,15 @@ export class User {
     default: null
   })
   password: string | null
+
+  @Prop({
+    select: false,
+    default: null
+  })
+  customerId: string | null
+
+  @Prop()
+  subscription: Subscription
 
   @Prop({
     default: ""

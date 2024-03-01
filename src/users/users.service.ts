@@ -76,6 +76,8 @@ export class UsersService {
     options?: {
       pickPassword?: boolean
       pickEmailVerificationData?: boolean
+      pickCustomerId?: boolean
+      pickSubscriptionData?: boolean
       object?: O
     }
   ): Promise<O extends true ? UserObject : UserDocument> {
@@ -90,6 +92,14 @@ export class UsersService {
         "+emailVerification.token",
         "+emailVerification.tokenDateCreated"
       )
+    }
+
+    if (options?.pickCustomerId) {
+      pickPrivateFields.push("+customerId")
+    }
+
+    if (options?.pickSubscriptionData) {
+      pickPrivateFields.push("+subscription.subscriptionId")
     }
 
     const query = "userId" in input ? {
@@ -186,6 +196,35 @@ export class UsersService {
         "emailVerification.tokenDateCreated",
         "password"
       ])
+    } catch (err) {
+      throw new BadRequestException("Something went wrong")
+    }
+  }
+
+  async updateSubscription(
+    userId: string,
+    input: Partial<User["subscription"]>
+  ) {
+    try {
+      const user = await this.findOne({
+        userId
+      }, {
+        object: false,
+        pickSubscriptionData: true
+      })
+
+      if (!user) {
+        throw new UnauthorizedException("Unable to find user")
+      }
+
+      user.subscription = {
+        ...user.toObject().subscription,
+        ...input
+      }
+
+      await user.save()
+
+      return user.toObject()
     } catch (err) {
       throw new BadRequestException("Something went wrong")
     }
