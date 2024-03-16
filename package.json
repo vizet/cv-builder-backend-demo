@@ -10,6 +10,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "run:prod": "yarn install && yarn build && yarn start:prod",
     "lint": "eslint \"{src,apps,libs}/**/*.ts\" --fix",
     "prepare": "npx simple-git-hooks"
   },
