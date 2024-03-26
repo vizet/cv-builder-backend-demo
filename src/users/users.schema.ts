@@ -33,14 +33,11 @@ class EmailVerification {
 })
 class Subscription {
   @Prop({
-    select: false,
-    default: ""
+    select: false
   })
   subscriptionId: string
 
-  @Prop({
-    default: false
-  })
+  @Prop()
   isActive: boolean
 }
 
@@ -75,7 +72,12 @@ export class User {
   })
   customerId: string | null
 
-  @Prop()
+  @Prop({
+    default: {
+      subscriptionId: "",
+      isActive: false
+    }
+  })
   subscription: Subscription
 
   @Prop({
