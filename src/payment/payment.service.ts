@@ -68,16 +68,49 @@ export class PaymentService {
       const customer = await this.getCustomer(userId)
       const paymentMethods = await this.stripe.customers.listPaymentMethods(customer.id)
 
-      return paymentMethods.data.map(i => ({
-        id: i.id,
-        dateCreated: new Date(i.created).toISOString(),
-        isDefault: "invoice_settings" in customer && i.id === customer.invoice_settings.default_payment_method,
-        card: {
-          brand: i.card.brand,
-          displayBrand: i.card.display_brand,
-          last4: i.card.last4
+      return paymentMethods.data.map(i => {
+        const object: {
+          id: string
+          type: string
+          dateCreated: string
+          isDefault: boolean
+          card?: {
+            brand: string
+            displayBrand: string
+            last4: string
+          }
+          sepa_debit?: {
+            bank_code: string
+            last4: string
+          }
+          paypal?: {email: string
+          }
+        } = {
+          id: i.id,
+          type: i.type,
+          dateCreated: new Date(i.created).toISOString(),
+          isDefault: "invoice_settings" in customer && i.id === customer.invoice_settings.default_payment_method
         }
-      }))
+
+        if ("card" in i) {
+          object.card = {
+            brand: i.card.brand,
+            displayBrand: i.card.display_brand,
+            last4: i.card.last4
+          }
+        } else if ("sepa_debit" in i) {
+          object.sepa_debit = {
+            bank_code: i.sepa_debit.bank_code,
+            last4: i.sepa_debit.last4
+          }
+        } else if ("paypal" in i) {
+          object.paypal = {
+            email: i.paypal.payer_email
+          }
+        }
+
+        return object
+      })
     } catch (err) {
       console.error(err)
       throw new BadRequestException("Something went wrong")
@@ -92,7 +125,10 @@ export class PaymentService {
       const intentRes = await this.stripe.setupIntents.create({
         customer: customerId,
         payment_method_types: [
-          "card"
+          "card",
+          "sepa_debit",
+          "paypal"
+          // "google_pay"
         ]
       })
 
