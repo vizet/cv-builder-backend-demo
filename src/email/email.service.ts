@@ -21,6 +21,28 @@ export class EmailService {
         templateId: this.configService.get("sendGrid.templates.emailConfirm"),
         dynamicTemplateData: {
           "url": `${this.configService.get("frontendUrl")}/auth/verify-email?token=${token}`
+                }
+      })
+    } catch (err) {
+      console.error(err)
+    }
+
+    return
+  }
+
+  async sendContactUsEmail(input: {
+    name: string
+    email: string
+    subject: string
+    summary: string
+  }) {
+    try {
+      await sgMail.send({
+        to: this.configService.get("sendGrid.emailFrom"),
+        from: this.configService.get("sendGrid.emailFrom"),
+        templateId: this.configService.get("sendGrid.templates.emailContactUs"),
+        dynamicTemplateData: {
+          ...input
         }
       })
     } catch (err) {

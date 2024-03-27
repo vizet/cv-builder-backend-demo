@@ -9,7 +9,8 @@ export default () => ({
     apiKey: process.env.SENDGRID_API_KEY,
     emailFrom: process.env.SENDGRID_EMAIL_FROM,
     templates: {
-      emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_CONFIRM
+      emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_CONFIRM,
+      emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_CONTACT_US
     }
   },
   cloudflare: {
