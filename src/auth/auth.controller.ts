@@ -79,4 +79,21 @@ export class AuthController {
   ) {
     return await this.authService.verifyEmail(token)
   }
+
+  @Public()
+  @Post("recovery-password")
+  async recoveryPasswordEmail(
+    @Body() input: {email: string}
+  ) {
+    return await this.authService.recoveryPasswordEmail(input.email)
+  }
+
+  @Public()
+  @Post("recovery-password/:token")
+  async recoveryPasswordEmailResetPassword(
+    @Body() input: {newPassword: string},
+    @Param("token") token: string
+  ) {
+    return await this.authService.recoveryPasswordEmailResetPassword(token, input.newPassword)
+  }
 }

@@ -51,4 +51,47 @@ export class EmailService {
 
     return
   }
+
+  async sendRecoveryPasswordEmail(input: {
+    email: string
+    name: string
+    token: string
+  }) {
+    try {
+      await sgMail.send({
+        to: input.email,
+        from: this.configService.get("sendGrid.emailFrom"),
+        templateId: this.configService.get("sendGrid.templates.emailRecoveryPassword"),
+        dynamicTemplateData: {
+          name: input.name,
+          button_url: `${this.configService.get("frontendUrl")}/auth/recover?token=${input.token}`
+        }
+      })
+    } catch (err) {
+      console.error(err)
+    }
+
+    return
+  }
+
+  async sendRecoveryPasswordSuccessfulEmail(input: {
+    email: string
+    name: string
+  }) {
+    try {
+      await sgMail.send({
+        to: input.email,
+        from: this.configService.get("sendGrid.emailFrom"),
+        templateId: this.configService.get("sendGrid.templates.emailRecoveryPasswordSuccessful"),
+        dynamicTemplateData: {
+          name: input.name,
+          button_url: `${this.configService.get("frontendUrl")}/auth/login`
+        }
+      })
+    } catch (err) {
+      console.error(err)
+    }
+
+    return
+  }
 }

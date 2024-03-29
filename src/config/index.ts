@@ -10,7 +10,9 @@ export default () => ({
     emailFrom: process.env.SENDGRID_EMAIL_FROM,
     templates: {
       emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_CONFIRM,
-      emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_CONTACT_US
+      emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_CONTACT_US,
+      emailRecoveryPassword: process.env.SENDGRID_TEMPLATE_EMAIL_RECOVERY_PASSWORD,
+      emailRecoveryPasswordSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_RECOVERY_PASSWORD_SUCCESSFUL
     }
   },
   cloudflare: {
