@@ -216,4 +216,55 @@ export class AuthService {
       throw new UnauthorizedException("Invalid email or token")
     }
   }
+
+  async recoveryPasswordEmail(email: string){
+    try {
+      const user = await this.usersService.findOne({email})
+
+      if (!user) {
+        throw new UnauthorizedException("Cannot sent recovery email")
+      } else {
+        const token = this.jwtService.sign({userId: user._id})
+
+        await this.emailService.sendRecoveryPasswordEmail({email: user.email, name: user.fullName, token})
+
+        return {
+          success: true
+        }
+      }
+    } catch (error) {
+      throw new UnauthorizedException("Cannot sent recovery email")
+    }
+  }
+
+  async recoveryPasswordEmailResetPassword(token: string, password: string){
+    try {
+      const tokenData = this.jwtService.verify(token)
+
+      if (!tokenData.userId) {
+        throw new UnauthorizedException("Cannot reset password")
+      } else {
+        const user = await this.usersService.findOne({userId: tokenData.userId})
+
+        if (!user) {
+          throw new UnauthorizedException("Cannot reset password")
+        } else {
+          const updatedUser = await this.usersService.updateProfile(tokenData.userId, {newResetPassword: password})
+
+          if (!updatedUser) {
+            throw new UnauthorizedException("Cannot reset password")
+          } else {
+            await this.emailService.sendRecoveryPasswordSuccessfulEmail({email: user.email, name: user.fullName})
+          }
+
+          return {
+            success: true
+          }
+        }
+      }
+
+    } catch (error) {
+      throw new UnauthorizedException("Cannot reset password")
+    }
+  }
 }
