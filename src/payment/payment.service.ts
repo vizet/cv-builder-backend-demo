@@ -79,10 +79,6 @@ export class PaymentService {
             displayBrand: string
             last4: string
           }
-          sepa_debit?: {
-            bank_code: string
-            last4: string
-          }
           paypal?: {email: string
           }
         } = {
@@ -97,11 +93,6 @@ export class PaymentService {
             brand: i.card.brand,
             displayBrand: i.card.display_brand,
             last4: i.card.last4
-          }
-        } else if ("sepa_debit" in i) {
-          object.sepa_debit = {
-            bank_code: i.sepa_debit.bank_code,
-            last4: i.sepa_debit.last4
           }
         } else if ("paypal" in i) {
           object.paypal = {
@@ -124,12 +115,9 @@ export class PaymentService {
       const customerId = await this.getCustomerId(userId)
       const intentRes = await this.stripe.setupIntents.create({
         customer: customerId,
-        payment_method_types: [
-          "card",
-          "sepa_debit",
-          "paypal"
-          // "google_pay"
-        ]
+        automatic_payment_methods: {
+          enabled: true
+        }
       })
 
       return {
