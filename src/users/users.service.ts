@@ -132,6 +132,7 @@ export class UsersService {
     userId: string,
     input: Partial<User & {
       newPassword: string
+      newResetPassword: string
     }>,
     avatar?: Express.Multer.File
   ) {
@@ -169,6 +170,12 @@ export class UsersService {
       } else {
         user.password = await bcrypt.hash(input.newPassword, 10)
       }
+    }
+
+    if ("newResetPassword" in input) {
+      const newHashedPassword = await bcrypt.hash(input.newResetPassword, 10)
+
+      user.password = newHashedPassword
     }
 
     if (avatar) {
