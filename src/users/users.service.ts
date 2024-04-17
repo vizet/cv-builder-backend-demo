@@ -11,6 +11,7 @@ import {omit} from "lodash"
 import {Model} from "mongoose"
 import {AuthService} from "src/auth/auth.service"
 import {CDNService} from "src/cdn/cdn.service"
+import {EmailService} from "src/email/email.service"
 import {User, UserDocument, UserObject} from "./users.schema"
 import * as bcrypt from "bcrypt"
 
@@ -20,7 +21,8 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<User>,
     @Inject(forwardRef(() => AuthService))
     private auth: AuthService,
-    private cdn: CDNService
+    private cdn: CDNService,
+    private emial: EmailService,
   ) {}
 
   async create(
@@ -169,6 +171,8 @@ export class UsersService {
         throw new UnauthorizedException("Invalid password")
       } else {
         user.password = await bcrypt.hash(input.newPassword, 10)
+
+        await this.emial.sendRecoveryPasswordSuccessfulEmail({email: user.email, name: user.fullName || user.firstName})
       }
     }
 

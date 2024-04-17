@@ -4,6 +4,7 @@ import {AuthModule} from "src/auth/auth.module"
 import {UsersService} from "./users.service"
 import {User, UsersSchema} from "./users.schema"
 import {CDNModule} from "src/cdn/cdn.module"
+import {EmailService} from "src/email/email.service"
 
 @Module({
   imports: [
@@ -14,8 +15,8 @@ import {CDNModule} from "src/cdn/cdn.module"
     forwardRef(() => AuthModule),
     CDNModule
   ],
-  providers: [UsersService],
-  exports: [UsersService]
+  providers: [UsersService, EmailService],
+  exports: [UsersService, EmailService]
 })
 
 export class UsersModule {}
