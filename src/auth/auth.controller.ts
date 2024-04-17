@@ -25,6 +25,7 @@ export class AuthController {
   @Public()
   @Post("signup")
   async signup(@Body() user: Pick<UserDocument, "email" | "password">) {
+    user.email = user.email.toLowerCase()
     return this.authService.signup(user)
   }
 
@@ -32,6 +33,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post("login")
   async login(@Request() req) {
+    req.user.email = req.user.email.toLowerCase()
     return this.authService.login(req.user)
   }
 
@@ -39,6 +41,7 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   @Post("login-google")
   async loginGoogle(@Request() req) {
+    req.user.email = req.user.email.toLowerCase()
     return this.authService.loginGoogle(req.user)
   }
 
@@ -62,6 +65,7 @@ export class AuthController {
     }>,
     @UploadedFile() avatar: Express.Multer.File
   ) {
+    body.email && (body.email = body.email.toLowerCase())
     return await this.authService.updateProfile(req.user._id, body, avatar)
   }
 
@@ -85,7 +89,7 @@ export class AuthController {
   async recoveryPasswordEmail(
     @Body() input: {email: string}
   ) {
-    return await this.authService.recoveryPasswordEmail(input.email)
+    return await this.authService.recoveryPasswordEmail(input.email.toLowerCase())
   }
 
   @Public()
