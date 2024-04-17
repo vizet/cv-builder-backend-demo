@@ -11,6 +11,7 @@ export class EmailController {
   sendContactUsEmail(
     @Body() input: { name: string, email: string, subject: string, summary: string }
   ) {
+    input.email = input.email.toLowerCase()
     return this.emailService.sendContactUsEmail(input)
   }
 }

@@ -52,7 +52,7 @@ export class GoogleAuthGuard implements CanActivate {
       }
 
       req["user"] = {
-        email: data.email,
+        email: data.email.toLowerCase(),
         avatar: data.picture,
         firstName: data.given_name,
         lastName: data.family_name
