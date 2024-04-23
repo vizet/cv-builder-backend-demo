@@ -71,6 +71,32 @@ export class AuthService {
     }
   }
 
+  async signupWithoutPassword(input: Pick<UserDocument, "email" | "firstName" | "lastName">) {
+    if (!input.email || !input.firstName || !input.lastName) {
+      throw new BadRequestException("Invalid email, first name or last name")
+    }
+
+    const salt = crypto.randomUUID()
+    const hashedPassword = await bcrypt.hash(salt, 10)
+
+    const user = await this.usersService.create({
+      email: input.email,
+      firstName: input.firstName,
+      lastName: input.lastName,
+      password: hashedPassword
+    })
+
+    await this.emailService.sendSignUpWithEmailSuccessfulEmail({email: user.email, name: user.fullName, generated_password: salt})
+
+    return {
+      accessToken: this.jwtService.sign({
+        _id: user._id,
+        email: user.email
+      }),
+      generatedPassword: salt
+    }
+  }
+
   async login(user: UserObject) {
     return {
       accessToken: this.jwtService.sign({
@@ -120,6 +146,34 @@ export class AuthService {
     const user = await this.usersService.findOne({userId}, {
       pickSubscriptionData: true
     })
+    let subscription: Partial<typeof user.subscription> = user.subscription
+
+    if (user.subscription.subscriptionId && user.subscription.isActive) {
+      subscription = {
+        isActive: await this.paymentService.checkSubscription(subscription.subscriptionId)
+      }
+    }
+
+    return {
+      ...user,
+      subscription: {
+        isActive: subscription.isActive
+      }
+    }
+  }
+
+  async getProfileByEmail(email: string) {
+    if (!email) {
+      throw new BadRequestException("Unable to find user")
+    }
+
+    const user = await this.usersService.findOne({email}, {
+      pickSubscriptionData: true
+    })
+
+    if (!user) {
+      throw new BadRequestException("Unable to find user")
+    }
     let subscription: Partial<typeof user.subscription> = user.subscription
 
     if (user.subscription.subscriptionId && user.subscription.isActive) {

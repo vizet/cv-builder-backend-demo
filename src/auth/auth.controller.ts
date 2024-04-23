@@ -30,6 +30,13 @@ export class AuthController {
   }
 
   @Public()
+  @Post("signup-without-password")
+  async signupWithoutPassword(@Body() user: Pick<UserDocument, "email" | "firstName" | "lastName">) {
+    user.email = user.email.toLowerCase()
+    return this.authService.signupWithoutPassword(user)
+  }
+
+  @Public()
   @UseGuards(LocalAuthGuard)
   @Post("login")
   async login(@Request() req) {
@@ -48,6 +55,20 @@ export class AuthController {
   @Get("profile")
   async getProfile(@Request() req: {user: UserFromToken}) {
     const user = await this.authService.getProfile(req.user._id)
+
+    if (!user) {
+      return null
+    }
+
+    return user
+  }
+
+  @Public()
+  @Get("profile/:email")
+  async getProfileByEmail(
+    @Param("email") email: string
+  ) {
+    const user = await this.authService.getProfileByEmail(email.toLowerCase())
 
     if (!user) {
       return null

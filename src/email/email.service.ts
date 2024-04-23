@@ -94,4 +94,28 @@ export class EmailService {
 
     return
   }
+
+  async sendSignUpWithEmailSuccessfulEmail(input: {
+    email: string
+    name: string
+    generated_password: string
+  }) {
+    try {
+      await sgMail.send({
+        to: input.email,
+        from: this.configService.get("sendGrid.emailFrom"),
+        templateId: this.configService.get("sendGrid.templates.emailSignUpWithEmailSuccessful"),
+        dynamicTemplateData: {
+          user_name: input.name,
+          user_email: input.email,
+          generated_password: input.generated_password,
+          button_url: `${this.configService.get("frontendUrl")}/auth/login`
+        }
+      })
+    } catch (err) {
+      console.error(err)
+    }
+
+    return
+  }
 }
