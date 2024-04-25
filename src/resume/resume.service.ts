@@ -4,12 +4,14 @@ import {
 } from "@nestjs/common"
 import {InjectModel} from "@nestjs/mongoose"
 import {Model} from "mongoose"
+import {CDNService} from "src/cdn/cdn.service"
 import {Resume} from "src/resume/resume.schema"
 
 @Injectable()
 export class ResumeService {
   constructor(
-    @InjectModel(Resume.name) private resumeModel: Model<Resume>
+    @InjectModel(Resume.name) private resumeModel: Model<Resume>,
+    private cdn: CDNService,
   ) {}
 
   async create(
@@ -74,7 +76,8 @@ export class ResumeService {
       title?: Resume["title"]
       preview?: Resume["preview"]
       data?: Partial<Resume["data"]>
-    }
+    },
+    avatar: Express.Multer.File
   ) {
     try {
       const resume = await this.resumeModel.findOne({
@@ -98,6 +101,19 @@ export class ResumeService {
         resume.data = {
           ...resume.data,
           ...input.data
+        }
+      }
+
+      if (avatar) {
+        if (resume.data.sections.profile.avatar && typeof resume.data.sections.profile.avatar === "string") {
+          await this.cdn.deleteImage(resume.data.sections.profile.avatar)
+        }
+
+        const avatarUrl = await this.cdn.uploadImage(avatar)
+
+        if (avatarUrl) {
+          resume.data.sections.profile.avatar = avatarUrl
+          resume.markModified("data")
         }
       }
 
