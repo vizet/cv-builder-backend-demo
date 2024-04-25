@@ -52,7 +52,7 @@ export class CDNService {
       const url = res.data?.result?.variants?.[0]
 
       if (url) {
-        return url
+        return url as string
       } else {
         throw new BadRequestException()
       }

@@ -43,6 +43,7 @@ export class Resume {
     }
     sections: {
       profile: {
+        avatar: string
         firstName: string
         lastName: string
         email: string
