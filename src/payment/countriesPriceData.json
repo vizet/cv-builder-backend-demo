@@ -1,0 +1,132 @@
+[
+  {
+    "country": "",
+    "key": "1",
+    "trialDays": 14
+  },
+  {
+    "country": "BG",
+    "key": "2",
+    "trialDays": 14
+  },
+  {
+    "country": "CZ",
+    "key": "3",
+    "trialDays": 14
+  },
+  {
+    "country": "DK",
+    "key": "4",
+    "trialDays": 14
+  },
+  {
+    "country": "FI",
+    "key": "5",
+    "trialDays": 14
+  },
+  {
+    "country": "HU",
+    "key": "6",
+    "trialDays": 14
+  },
+  {
+    "country": "NO",
+    "key": "7",
+    "trialDays": 14
+  },
+  {
+    "country": "PL",
+    "key": "8",
+    "trialDays": 14
+  },
+  {
+    "country": "RO",
+    "key": "9",
+    "trialDays": 14
+  },
+  {
+    "country": "RS",
+    "key": "10",
+    "trialDays": 7
+  },
+  {
+    "country": "SE",
+    "key": "11",
+    "trialDays": 14
+  },
+  {
+    "country": "TR",
+    "key": "12",
+    "trialDays": 7
+  },
+  {
+    "country": "UA",
+    "key": "13",
+    "trialDays": 7
+  },
+  {
+    "country": "PE",
+    "key": "14",
+    "trialDays": 7
+  },
+  {
+    "country": "CL",
+    "key": "14",
+    "trialDays": 7
+  },
+  {
+    "country": "AR",
+    "key": "14",
+    "trialDays": 7
+  },
+  {
+    "country": "US",
+    "key": "15",
+    "trialDays": 7
+  },
+  {
+    "country": "CA",
+    "key": "15",
+    "trialDays": 7
+  },
+  {
+    "country": "RS",
+    "key": "15",
+    "trialDays": 14
+  },
+  {
+    "country": "SA",
+    "key": "15",
+    "trialDays": 7
+  },
+  {
+    "country": "AE",
+    "key": "15",
+    "trialDays": 7
+  },
+  {
+    "country": "QA",
+    "key": "15",
+    "trialDays": 7
+  },
+  {
+    "country": "KW",
+    "key": "15",
+    "trialDays": 7
+  },
+  {
+    "country": "GB",
+    "key": "16",
+    "trialDays": 7
+  },
+  {
+    "country": "AU",
+    "key": "17",
+    "trialDays": 7
+  },
+  {
+    "country": "NZ",
+    "key": "18",
+    "trialDays": 7
+  }
+]

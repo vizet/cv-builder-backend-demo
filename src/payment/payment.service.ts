@@ -4,6 +4,7 @@ import {
 } from "@nestjs/common"
 import {ConfigService} from "@nestjs/config"
 import {UsersService} from "src/users/users.service"
+import * as countriesPriceData from "./countriesPriceData.json"
 import Stripe from "stripe"
 
 @Injectable()
@@ -63,45 +64,38 @@ export class PaymentService {
     }
   }
 
-  async getMethods(userId: string) {
+  async getPricing(
+    userId: string
+  ) {
     try {
-      const customer = await this.getCustomer(userId)
-      const paymentMethods = await this.stripe.customers.listPaymentMethods(customer.id)
-
-      return paymentMethods.data.map(i => {
-        const object: {
-          id: string
-          type: string
-          dateCreated: string
-          isDefault: boolean
-          card?: {
-            brand: string
-            displayBrand: string
-            last4: string
-          }
-          paypal?: {email: string
-          }
-        } = {
-          id: i.id,
-          type: i.type,
-          dateCreated: new Date(i.created).toISOString(),
-          isDefault: "invoice_settings" in customer && i.id === customer.invoice_settings.default_payment_method
-        }
-
-        if ("card" in i) {
-          object.card = {
-            brand: i.card.brand,
-            displayBrand: i.card.display_brand,
-            last4: i.card.last4
-          }
-        } else if ("paypal" in i) {
-          object.paypal = {
-            email: i.paypal.payer_email
-          }
-        }
-
-        return object
+      const user = await this.usersService.findOne({
+        userId
       })
+
+      const countryPrice = countriesPriceData.find(i => i.country === user.country) || countriesPriceData[0]
+      const pricesRes = await this.stripe.prices.search({
+        query: `lookup_key:'${countryPrice.key}_trial' OR lookup_key:'${countryPrice.key}_sub'`
+      })
+      const pricesList = pricesRes.data.filter(i => i.active)
+      const prices = {
+        trial: pricesList.find(i => i.type === "one_time"),
+        subscription: pricesList.find(i => i.type === "recurring")
+      }
+
+      return {
+        currency: prices.trial.currency,
+        trial: {
+          id: prices.trial.id,
+          period: countryPrice.trialDays,
+          amount: (prices.trial.unit_amount / 100).toFixed(2),
+          description: prices.trial.nickname
+        },
+        subscription: {
+          id: prices.subscription.id,
+          amount: (prices.subscription.unit_amount / 100).toFixed(2),
+          description: prices.subscription.nickname
+        }
+      }
     } catch (err) {
       console.error(err)
       throw new BadRequestException("Something went wrong")
@@ -129,82 +123,42 @@ export class PaymentService {
     }
   }
 
-  async deleteMethod(
-    paymentMethodId: string
-  ) {
-    try {
-      await this.stripe.paymentMethods.detach(paymentMethodId)
-
-      return {
-        success: true
-      }
-    } catch (err) {
-      console.error(err)
-      throw new BadRequestException("Something went wrong")
-    }
-  }
-
-  async setDefaultMethod(
-    userId: string,
-    paymentMethodId: string
+  async buySubscription(
+    userId: string
   ) {
     try {
       const customerId = await this.getCustomerId(userId)
+      const paymentMethods = await this.stripe.customers.listPaymentMethods(customerId)
+      const prices = await this.getPricing(userId)
+      const lastPaymentMethod = paymentMethods.data.sort((a, b) => b.created - a.created)[0]
 
       await this.stripe.customers.update(customerId, {
         invoice_settings: {
-          default_payment_method: paymentMethodId
+          default_payment_method: lastPaymentMethod.id
         }
       })
 
-      return {
-        success: true
-      }
-    } catch (err) {
-      console.error(err)
-      throw new BadRequestException("Something went wrong")
-    }
-  }
-
-  async buySubscription(
-    userId: string,
-    input: {
-      paymentMethodId: string
-    }
-  ) {
-    try {
-      const customerId = await this.getCustomerId(userId)
-
-      const prices = await this.stripe.prices.list()
-      const oneTimePrice = prices.data.find(i => i.type === "one_time")
-      const reccuringPrice = prices.data.find(i => i.type === "recurring")
-
-      if (!oneTimePrice) {
-        throw new BadRequestException("Can't find product one time price")
-      }
-
-      if (!reccuringPrice) {
-        throw new BadRequestException("Can't find product reccuring price")
-      }
-
       const invoice = await this.stripe.invoices.create({
         customer: customerId,
-        default_payment_method: input.paymentMethodId
+        currency: prices.currency,
+        default_payment_method: lastPaymentMethod.id
       })
 
       await this.stripe.invoiceItems.create({
         invoice: invoice.id,
         customer: customerId,
-        price: oneTimePrice.id
+        currency: prices.currency,
+        price: prices.trial.id
       })
       await this.stripe.invoices.finalizeInvoice(invoice.id)
       await this.stripe.invoices.pay(invoice.id)
 
-      const futureTimestamp = Math.floor((Date.now() + 1000 * 60 * 60 * 24 * 14) / 1000)
+      const futureTimestamp = Math.floor((Date.now() + 1000 * 60 * 60 * 24 * prices.trial.period) / 1000)
 
       const subscription = await this.stripe.subscriptions.create({
         customer: customerId,
-        items: [{price: reccuringPrice.id}],
+        currency: prices.currency,
+        items: [{price: prices.subscription.id}],
         billing_cycle_anchor: futureTimestamp,
         trial_end: futureTimestamp
       })

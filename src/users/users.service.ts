@@ -22,7 +22,7 @@ export class UsersService {
     @Inject(forwardRef(() => AuthService))
     private auth: AuthService,
     private cdn: CDNService,
-    private emial: EmailService,
+    private emial: EmailService
   ) {}
 
   async create(
@@ -148,6 +148,10 @@ export class UsersService {
 
     if (!user) {
       throw new UnauthorizedException("Unable to find user")
+    }
+
+    if ("country" in input && !user.country) {
+      user.country = input.country
     }
 
     if ("email" in input && input.email !== user.email) {

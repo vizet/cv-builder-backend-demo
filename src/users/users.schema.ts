@@ -67,6 +67,11 @@ export class User {
   password: string | null
 
   @Prop({
+    default: null
+  })
+  country: string | null
+
+  @Prop({
     select: false,
     default: null
   })

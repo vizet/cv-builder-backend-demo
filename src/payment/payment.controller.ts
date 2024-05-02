@@ -1,11 +1,8 @@
 import {
   Body,
   Controller,
-  Delete,
-  Get,
-  Param,
+  Delete, Get,
   Post,
-  Put,
   Request
 } from "@nestjs/common"
 import {UserFromToken} from "src/auth/auth.service"
@@ -17,6 +14,13 @@ export class PaymentController {
     private readonly paymentService: PaymentService
   ) {}
 
+  @Get("pricing")
+  async getPricing(
+    @Request() req: {user: UserFromToken}
+  ) {
+    return this.paymentService.getPricing(req.user._id)
+  }
+
   @Post("intent")
   async createPaymentIntent(
     @Request() req: {user: UserFromToken}
@@ -24,34 +28,11 @@ export class PaymentController {
     return this.paymentService.createIntent(req.user._id)
   }
 
-  @Get("methods")
-  async getMethods(
-    @Request() req: {user: UserFromToken}
-  ) {
-    return this.paymentService.getMethods(req.user._id)
-  }
-
-  @Delete("methods/:id")
-  async deleteMethod(
-    @Param("id") id: string
-  ) {
-    return this.paymentService.deleteMethod(id)
-  }
-
-  @Put("methods/:id/set-default")
-  async setMethodDefault(
-    @Request() req: {user: UserFromToken},
-    @Param("id") id: string
-  ) {
-    return this.paymentService.setDefaultMethod(req.user._id, id)
-  }
-
   @Post("subscription")
   async buySubscription(
-    @Request() req: {user: UserFromToken},
-    @Body() body: Parameters<typeof this.paymentService.buySubscription>[1]
+    @Request() req: {user: UserFromToken}
   ) {
-    return this.paymentService.buySubscription(req.user._id, body)
+    return this.paymentService.buySubscription(req.user._id)
   }
 
   @Delete("subscription")
