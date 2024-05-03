@@ -124,6 +124,10 @@ export class AuthService {
             tokenDateCreated: null
           }
         })
+
+        if (user) {
+          this.emailService.sendSignUpWithGoogleSuccessfulEmail({name: user.fullName, email: user.email})
+        }
       }
 
       return {
