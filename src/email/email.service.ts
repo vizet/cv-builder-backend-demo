@@ -118,4 +118,73 @@ export class EmailService {
 
     return
   }
+
+  async sendSignUpWithGoogleSuccessfulEmail(input: {
+    email: string
+    name: string
+  }) {
+    try {
+      await sgMail.send({
+        to: input.email,
+        from: this.configService.get("sendGrid.emailFrom"),
+        templateId: this.configService.get("sendGrid.templates.emailSignUpWithGoogleSuccessful"),
+        dynamicTemplateData: {
+          user_name: input.name,
+          button_url: `${this.configService.get("frontendUrl")}/auth/login`
+        }
+      })
+    } catch (err) {
+      console.error(err)
+    }
+
+    return
+  }
+
+  async sendAccountSubscriptionCancelationEmail(input: {
+    email: string
+    name: string
+    expiresDate:string
+  }) {
+    try {
+      await sgMail.send({
+        to: input.email,
+        from: this.configService.get("sendGrid.emailFrom"),
+        templateId: this.configService.get("sendGrid.templates.emailAccountSubscriptionCancelation"),
+        dynamicTemplateData: {
+          user_name: input.name,
+          expires_date: input.expiresDate,
+          button_url: `${this.configService.get("frontendUrl")}/auth/login`
+        }
+      })
+    } catch (err) {
+      console.error(err)
+    }
+
+    return
+  }
+
+  async sendAccountInitialPaymentEmail(input: {
+    email: string
+    name: string
+    price: string
+    trialExpiresDate:string
+  }) {
+    try {
+      await sgMail.send({
+        to: input.email,
+        from: this.configService.get("sendGrid.emailFrom"),
+        templateId: this.configService.get("sendGrid.templates.emailAccountInitialPayment"),
+        dynamicTemplateData: {
+          user_name: input.name,
+          trial_expires_date: input.trialExpiresDate,
+          price: input.price,
+          button_url: `${this.configService.get("frontendUrl")}/auth/login`
+        }
+      })
+    } catch (err) {
+      console.error(err)
+    }
+
+    return
+  }
 }

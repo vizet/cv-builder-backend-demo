@@ -13,7 +13,10 @@ export default () => ({
       emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_CONTACT_US,
       emailRecoveryPassword: process.env.SENDGRID_TEMPLATE_EMAIL_RECOVERY_PASSWORD,
       emailRecoveryPasswordSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_RECOVERY_PASSWORD_SUCCESSFUL,
-      emailSignUpWithEmailSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_SIGNUP_WITH_EMAIL_SUCCESSFUL
+      emailSignUpWithEmailSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_SIGNUP_WITH_EMAIL_SUCCESSFUL,
+      emailSignUpWithGoogleSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_SIGNUP_WITH_GOOGLE_SUCCESSFUL,
+      emailAccountSubscriptionCancelation: process.env.SENDGRID_TEMPLATE_EMAIL_ACCOUNT_SUBSCRIPTION_CANCELATION,
+      emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_ACCOUNT_INITIAL_PAYMENT
     }
   },
   cloudflare: {

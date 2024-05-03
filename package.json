@@ -33,6 +33,7 @@
     "@sendgrid/mail": "^8.1.0",
     "axios": "^1.6.5",
     "bcrypt": "^5.1.1",
+    "date-fns": "^3.6.0",
     "lodash": "^4.17.21",
     "mongoose": "^8.0.3",
     "passport": "^0.7.0",

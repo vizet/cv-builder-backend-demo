@@ -3,9 +3,11 @@ import {
   Injectable, UnauthorizedException
 } from "@nestjs/common"
 import {ConfigService} from "@nestjs/config"
-import {UsersService} from "src/users/users.service"
-import * as countriesPriceData from "./countriesPriceData.json"
 import Stripe from "stripe"
+import {format} from "date-fns"
+import {UsersService} from "src/users/users.service"
+import {EmailService} from "src/email/email.service"
+import * as countriesPriceData from "./countriesPriceData.json"
 
 @Injectable()
 export class PaymentService {
@@ -14,7 +16,8 @@ export class PaymentService {
   constructor(
     configService: ConfigService,
     @Inject(forwardRef(() => UsersService))
-    private usersService: UsersService
+    private usersService: UsersService,
+    private emailService: EmailService
   ) {
     this.stripe = new Stripe(configService.get("stripe.secretKey"))
   }
@@ -127,6 +130,8 @@ export class PaymentService {
     userId: string
   ) {
     try {
+      const user = await this.usersService.findOne({userId})
+
       const customerId = await this.getCustomerId(userId)
       const paymentMethods = await this.stripe.customers.listPaymentMethods(customerId)
       const prices = await this.getPricing(userId)
@@ -168,6 +173,10 @@ export class PaymentService {
         isActive: true
       })
 
+      const price = `$${prices.subscription.amount}`
+      const trialExpiresDate = format(new Date(subscription.current_period_end * 1000), "dd MMM yyyy")
+      await this.emailService.sendAccountInitialPaymentEmail({email: user.email, name: user.fullName, price, trialExpiresDate})
+
       return {
         success: true
       }
@@ -205,12 +214,18 @@ export class PaymentService {
         throw new UnauthorizedException("Unable to find user")
       }
 
-      await this.stripe.subscriptions.cancel(user.subscription.subscriptionId)
+      const sub = await this.stripe.subscriptions.cancel(user.subscription.subscriptionId)
 
       await this.usersService.updateSubscription(userId, {
         subscriptionId: null,
         isActive: false
       })
+
+      if (sub) {
+        const expiresDate = format(new Date(sub.current_period_end * 1000), "dd MMM yyyy")
+
+        await this.emailService.sendAccountSubscriptionCancelationEmail({email: user.email, name: user.fullName, expiresDate})
+      }
 
       return {
         success: true
