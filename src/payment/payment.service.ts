@@ -173,7 +173,7 @@ export class PaymentService {
         isActive: true
       })
 
-      const price = `$${prices.subscription.amount}`
+      const price = `€${prices.subscription.amount}`
       const trialExpiresDate = format(new Date(subscription.current_period_end * 1000), "dd MMM yyyy")
       await this.emailService.sendAccountInitialPaymentEmail({email: user.email, name: user.fullName, price, trialExpiresDate})
 

@@ -95,6 +95,6 @@ export class ResumeController {
       return res.data.pipe(response)
     }
 
-    return response.status(404).send()
+    return response.status(204).send()
   }
 }
