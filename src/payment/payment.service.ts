@@ -156,7 +156,7 @@ export class PaymentService {
         price: prices.trial.id
       })
       await this.stripe.invoices.finalizeInvoice(invoice.id)
-      await this.stripe.invoices.pay(invoice.id)
+      const paidInvoice = await this.stripe.invoices.pay(invoice.id)
 
       const futureTimestamp = Math.floor((Date.now() + 1000 * 60 * 60 * 24 * prices.trial.period) / 1000)
 
@@ -175,10 +175,33 @@ export class PaymentService {
 
       const price = `€${prices.subscription.amount}`
       const trialExpiresDate = format(new Date(subscription.current_period_end * 1000), "dd MMM yyyy")
-      await this.emailService.sendAccountInitialPaymentEmail({email: user.email, name: user.fullName, price, trialExpiresDate})
+
+      await this.emailService.sendAccountInitialPaymentEmail({
+        email: user.email,
+        name: user.fullName,
+        price,
+        trialExpiresDate
+      })
 
       return {
-        success: true
+        success: true,
+        data: {
+          transaction_id: paidInvoice.payment_intent,
+          currency: paidInvoice.currency,
+          value: paidInvoice.amount_paid,
+          customer: {
+            id: paidInvoice.customer,
+            customer_email: paidInvoice.customer_email,
+            customer_name: paidInvoice.customer_name
+          },
+          items: [
+            {
+              item_id: prices.trial.id,
+              item_name: "Trial",
+              affiliation: paidInvoice.account_name
+            }
+          ]
+        }
       }
     } catch (err) {
       console.error(err)
