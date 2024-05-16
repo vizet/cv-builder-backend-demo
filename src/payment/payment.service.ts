@@ -68,14 +68,21 @@ export class PaymentService {
   }
 
   async getPricing(
-    userId: string
+    userId?: string,
+    country?: string
   ) {
     try {
-      const user = await this.usersService.findOne({
-        userId
-      })
+      let userCountry = country
 
-      const countryPrice = countriesPriceData.find(i => i.country === user.country) || countriesPriceData[0]
+      if (userId) {
+        const user = await this.usersService.findOne({
+          userId
+        })
+
+        userCountry = user.country
+      }
+
+      const countryPrice = countriesPriceData.find(i => i.country === userCountry) || countriesPriceData[0]
       const pricesRes = await this.stripe.prices.search({
         query: `lookup_key:'${countryPrice.key}_trial' OR lookup_key:'${countryPrice.key}_sub'`
       })

@@ -1,9 +1,12 @@
 import {
   Controller,
-  Delete, Get,
+  Delete,
+  Get,
   Post,
+  Query,
   Request
 } from "@nestjs/common"
+import {Public} from "src/auth/auth.decorators"
 import {UserFromToken} from "src/auth/auth.service"
 import {PaymentService} from "./payment.service"
 
@@ -13,11 +16,15 @@ export class PaymentController {
     private readonly paymentService: PaymentService
   ) {}
 
+  @Public()
   @Get("pricing")
   async getPricing(
-    @Request() req: {user: UserFromToken}
-  ) {
-    return this.paymentService.getPricing(req.user._id)
+    @Request() req: {user?: UserFromToken},
+    @Query() query: {
+      country: string
+    }
+) {
+    return this.paymentService.getPricing(req.user?._id, query.country)
   }
 
   @Post("intent")
