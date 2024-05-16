@@ -11,22 +11,19 @@ import {randomBytes} from "crypto"
 
 @Injectable()
 export class StorageService {
-  private s3Client: S3Client
-  private REGION = process.env.AWS_S3_REGION || ""
-  private BUCKET = process.env.AWS_S3_BUCKET || ""
+  constructor(
+    private configService: ConfigService
+  ) {}
 
-  constructor(private configService: ConfigService) {
-    this.REGION = this.configService.get("awsS3Storage.awsS3Region") || ""
-    this.BUCKET = this.configService.get("awsS3Storage.awsS3Bucket") || ""
+  private BUCKET = this.configService.get("awsS3Storage.awsS3Bucket") || ""
 
-    this.s3Client = new S3Client({
-      credentials: {
-        accessKeyId: this.configService.get("awsS3Storage.awsAccessKeyId") || "",
-        secretAccessKey: this.configService.get("awsS3Storage.awsAccessKeySecret") || ""
-      },
-      region: this.configService.get("awsS3Storage.awsS3Region") || ""
-    })
-  }
+  private s3Client = new S3Client({
+    credentials: {
+      accessKeyId: this.configService.get("awsS3Storage.awsAccessKeyId") || "",
+      secretAccessKey: this.configService.get("awsS3Storage.awsAccessKeySecret") || ""
+    },
+    region: this.configService.get("awsS3Storage.awsS3Region") || ""
+  })
 
   private randomaseImageName(bytes = 32) {
     return randomBytes(bytes).toString("hex")
