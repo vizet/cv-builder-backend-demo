@@ -12,10 +12,10 @@ import {randomBytes} from "crypto"
 @Injectable()
 export class StorageService {
   private s3Client: S3Client
-  private REGION = ""
-  private BUCKET = ""
+  private REGION = process.env.AWS_S3_REGION || ""
+  private BUCKET = process.env.AWS_S3_BUCKET || ""
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(private configService: ConfigService) {
     this.REGION = this.configService.get("awsS3Storage.awsS3Region") || ""
     this.BUCKET = this.configService.get("awsS3Storage.awsS3Bucket") || ""
 
@@ -24,7 +24,7 @@ export class StorageService {
         accessKeyId: this.configService.get("awsS3Storage.awsAccessKeyId") || "",
         secretAccessKey: this.configService.get("awsS3Storage.awsAccessKeySecret") || ""
       },
-      region: this.REGION
+      region: this.configService.get("awsS3Storage.awsS3Region") || ""
     })
   }
 
@@ -50,10 +50,8 @@ export class StorageService {
     try {
       const s3Response = await this.s3Client.send(command)
 
-      console.log(s3Response)
       return {...s3Response, imageName: params.Key}
     } catch (e) {
-      console.log("ERROR")
       console.log(e)
     }
   }
@@ -71,10 +69,8 @@ export class StorageService {
     try {
       const s3Response = await this.s3Client.send(command)
 
-      console.log(s3Response)
       return {...s3Response, imageName: params.Key}
     } catch (e) {
-      console.log("ERROR")
       console.log(e)
     }
   }
