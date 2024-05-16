@@ -22,7 +22,7 @@ export class StorageService {
       accessKeyId: this.configService.get("awsS3Storage.awsAccessKeyId") || "",
       secretAccessKey: this.configService.get("awsS3Storage.awsAccessKeySecret") || ""
     },
-    region: this.configService.get("awsS3Storage.awsS3Region") || ""
+    region: "eu-north-1"
   })
 
   private randomaseImageName(bytes = 32) {
