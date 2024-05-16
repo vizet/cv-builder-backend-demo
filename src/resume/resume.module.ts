@@ -3,9 +3,9 @@ import {MongooseModule} from "@nestjs/mongoose"
 import {ResumeController} from "./resume.controller"
 import {ResumeService} from "./resume.service"
 import {Resume, ResumeSchema} from "./resume.schema"
-import {CDNService} from "src/cdn/cdn.service"
-import {CDNModule} from "src/cdn/cdn.module"
 import {HttpModule} from "@nestjs/axios"
+import {StorageModule} from "src/storage/storage.module"
+import {StorageService} from "src/storage/storage.service"
 
 @Module({
   imports: [
@@ -13,10 +13,10 @@ import {HttpModule} from "@nestjs/axios"
       name: Resume.name,
       schema: ResumeSchema
     }]),
-    CDNModule,
+    StorageModule,
     HttpModule
   ],
-  providers: [ResumeService, CDNService],
+  providers: [ResumeService, StorageService],
   controllers: [ResumeController],
   exports: [ResumeService]
 })

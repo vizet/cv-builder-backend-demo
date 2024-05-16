@@ -10,6 +10,7 @@ import {AuthModule} from "src/auth/auth.module"
 import {PaymentModule} from "src/payment/payment.module"
 import {ResumeModule} from "src/resume/resume.module"
 import {UsersModule} from "src/users/users.module"
+import {StorageModule} from "./storage/storage.module"
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import {UsersModule} from "src/users/users.module"
     AuthModule,
     UsersModule,
     ResumeModule,
-    PaymentModule
+    PaymentModule,
+    StorageModule
   ],
   controllers: [AppController],
   providers: [

@@ -10,7 +10,7 @@ import {InjectModel} from "@nestjs/mongoose"
 import {omit} from "lodash"
 import {Model} from "mongoose"
 import {AuthService} from "src/auth/auth.service"
-import {CDNService} from "src/cdn/cdn.service"
+import {StorageService} from "src/storage/storage.service"
 import {EmailService} from "src/email/email.service"
 import {User, UserDocument, UserObject} from "./users.schema"
 import * as bcrypt from "bcrypt"
@@ -21,7 +21,7 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<User>,
     @Inject(forwardRef(() => AuthService))
     private auth: AuthService,
-    private cdn: CDNService,
+    private storage: StorageService,
     private emial: EmailService
   ) {}
 
@@ -187,14 +187,15 @@ export class UsersService {
     }
 
     if (avatar) {
-      if (user.avatar?.includes("imagedelivery.net")) {
-        await this.cdn.deleteImage(user.avatar)
+      if (user.avatar) {
+        await this.storage.deleteFile(user.avatar)
       }
 
-      user.avatar = await this.cdn.uploadImage(avatar)
+      const imgRes = await this.storage.uploadFile(avatar, "profile_avatars")
+      imgRes?.imageName && (user.avatar = imgRes.imageName)
     } else if ("avatar" in input) {
-      if (!input.avatar && user.avatar.includes("imagedelivery.net")) {
-        await this.cdn.deleteImage(user.avatar)
+      if (!input.avatar && user.avatar) {
+        await this.storage.deleteFile(user.avatar)
       }
 
       user.avatar = input.avatar

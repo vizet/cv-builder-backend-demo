@@ -28,5 +28,11 @@ export default () => ({
   stripe: {
     publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
     secretKey: process.env.STRIPE_SECRET_KEY
+  },
+  awsS3Storage: {
+    awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    awsAccessKeySecret: process.env.AWS_ACCESS_KEY_SECRET,
+    awsS3Region: process.env.AWS_S3_REGION,
+    awsS3Bucket: process.env.AWS_S3_BUCKET
   }
 })
