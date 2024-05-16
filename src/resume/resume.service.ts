@@ -4,14 +4,14 @@ import {
 } from "@nestjs/common"
 import {InjectModel} from "@nestjs/mongoose"
 import {Model} from "mongoose"
-import {CDNService} from "src/cdn/cdn.service"
 import {Resume} from "src/resume/resume.schema"
+import {StorageService} from "src/storage/storage.service"
 
 @Injectable()
 export class ResumeService {
   constructor(
     @InjectModel(Resume.name) private resumeModel: Model<Resume>,
-    private cdn: CDNService,
+    private storage: StorageService,
   ) {}
 
   async create(
@@ -106,13 +106,14 @@ export class ResumeService {
 
       if (avatar) {
         if (resume.data.sections.profile.avatar && typeof resume.data.sections.profile.avatar === "string") {
-          await this.cdn.deleteImage(resume.data.sections.profile.avatar)
+          await this.storage.deleteFile(resume.data.sections.profile.avatar)
         }
 
-        const avatarUrl = await this.cdn.uploadImage(avatar)
+        const imgRes = await this.storage.uploadFile(avatar, "resume_avatars")
 
-        if (avatarUrl) {
-          resume.data.sections.profile.avatar = avatarUrl
+        console.log({imgRes})
+        if (imgRes) {
+          resume.data.sections.profile.avatar = imgRes.imageName
           resume.markModified("data")
         }
       }
