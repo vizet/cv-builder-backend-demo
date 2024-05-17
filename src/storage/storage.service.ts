@@ -39,7 +39,8 @@ export class StorageService {
       Bucket: bucket,
       Key: name,
       Body: file,
-      ContentType: mimetype
+      ContentType: mimetype,
+      ACL: "public-read-write"
     }
 
     const command = new PutObjectCommand(params)
