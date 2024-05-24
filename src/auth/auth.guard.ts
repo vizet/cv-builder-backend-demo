@@ -5,8 +5,10 @@ import {
   UnauthorizedException
 } from "@nestjs/common"
 import {Reflector} from "@nestjs/core"
+import {JwtService} from "@nestjs/jwt"
 import {AuthGuard as PassportAuthGuard} from "@nestjs/passport"
 import axios from "axios"
+import {ExtractJwt} from "passport-jwt"
 import {IS_PUBLIC_KEY} from "./auth.decorators"
 
 @Injectable()
@@ -14,7 +16,10 @@ export class LocalAuthGuard extends PassportAuthGuard(["local"]) {}
 
 @Injectable()
 export class AuthGuard extends PassportAuthGuard(["jwt"]) {
-  constructor(private reflector: Reflector) {
+  constructor(
+    private reflector: Reflector,
+    private jwtService: JwtService
+  ) {
     super()
   }
 
@@ -23,6 +28,18 @@ export class AuthGuard extends PassportAuthGuard(["jwt"]) {
       context.getHandler(),
       context.getClass()
     ])
+
+    const req = context.switchToHttp().getRequest()
+    const extractToken = ExtractJwt.fromAuthHeaderAsBearerToken()
+    const token = extractToken(req)
+
+    if (token) {
+      const user = this.jwtService.verify(token)
+
+      if (user) {
+        req.user = user
+      }
+    }
 
     if (isPublic) {
       return true

@@ -1,6 +1,7 @@
 import {Module} from "@nestjs/common"
 import {ConfigModule, ConfigService} from "@nestjs/config"
 import {APP_GUARD} from "@nestjs/core"
+import {JwtModule} from "@nestjs/jwt"
 import {MongooseModule} from "@nestjs/mongoose"
 import {AuthGuard} from "src/auth/auth.guard"
 import config from "src/config"
@@ -23,6 +24,16 @@ import {StorageModule} from "./storage/storage.module"
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         uri: configService.get("db.host")
+      })
+    }),
+    JwtModule.registerAsync({
+      global: true,
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get("jwtSecret"),
+        signOptions: {
+          expiresIn: "30d"
+        }
       })
     }),
     AuthModule,

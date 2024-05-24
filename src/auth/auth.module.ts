@@ -15,21 +15,12 @@ import {UsersModule} from "src/users/users.module"
     EmailModule,
     forwardRef(() => UsersModule),
     PaymentModule,
-    PassportModule,
-    JwtModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get("jwtSecret"),
-        signOptions: {
-          expiresIn: "30d"
-        }
-      })
-    })
+    PassportModule
   ],
   providers: [
-    AuthService,
     LocalStrategy,
-    JwtStrategy
+    JwtStrategy,
+    AuthService
   ],
   controllers: [AuthController],
   exports: [AuthService]
