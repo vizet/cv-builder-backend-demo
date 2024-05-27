@@ -187,6 +187,7 @@ export class EmailService {
   async sendAccountInitialPaymentEmail(input: {
     email: string
     name: string
+    trialPeriod: number
     price: string
     trialExpiresDate:string
   }) {
@@ -200,6 +201,7 @@ export class EmailService {
         templateId: this.configService.get("sendGrid.templates.emailAccountInitialPayment"),
         dynamicTemplateData: {
           user_name: input.name,
+          trial_period_days: input.trialPeriod,
           trial_expires_date: input.trialExpiresDate,
           price: input.price,
           button_url: `${this.configService.get("frontendUrl")}/auth/login`
