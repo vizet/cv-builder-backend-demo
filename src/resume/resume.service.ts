@@ -111,7 +111,6 @@ export class ResumeService {
 
         const imgRes = await this.storage.uploadFile(avatar, "resume_avatars")
 
-        console.log({imgRes})
         if (imgRes) {
           resume.data.sections.profile.avatar = imgRes.imageName
           resume.markModified("data")
