@@ -1,5 +1,5 @@
 import {ConfigService} from "@nestjs/config"
-import {Injectable} from "@nestjs/common"
+import {BadRequestException, Injectable} from "@nestjs/common"
 import {
   DeleteObjectCommand,
   DeleteObjectCommandInput,
@@ -49,7 +49,7 @@ export class StorageService {
 
       return {...s3Response, imageName: params.Key}
     } catch (e) {
-      console.log(e)
+      throw new BadRequestException("Something went wrong")
     }
   }
 
@@ -68,7 +68,7 @@ export class StorageService {
 
       return {...s3Response, imageName: params.Key}
     } catch (e) {
-      console.log(e)
+      throw new BadRequestException("Something went wrong")
     }
   }
 

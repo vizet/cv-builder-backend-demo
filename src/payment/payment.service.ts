@@ -9,6 +9,7 @@ import {format} from "date-fns"
 import {UsersService} from "src/users/users.service"
 import {EmailService} from "src/email/email.service"
 import * as countriesPriceData from "./countriesPriceData.json"
+import * as countriesCurrency from "./countriesCurrency.json"
 
 @Injectable()
 export class PaymentService {
@@ -208,7 +209,8 @@ export class PaymentService {
           trialExpiryDate: new Date(futureTimestamp * 1000)
         })
 
-        const price = `${prices.subscription.description}`
+        const currencySymbol = countriesCurrency[prices.currency.toUpperCase()]?.symbol_native || "$"
+        const price = `${currencySymbol}${prices.subscription.amount}`
         const trialExpiryDate = format(new Date(futureTimestamp * 1000), "dd MMM yyyy")
 
         await this.emailService.sendAccountInitialPaymentEmail({
