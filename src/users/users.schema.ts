@@ -33,12 +33,24 @@ class EmailVerification {
 })
 class Subscription {
   @Prop({
-    select: false
+    select: false,
+    default: ""
   })
   subscriptionId: string
 
   @Prop()
   isActive: boolean
+
+  @Prop({
+    default: false
+  })
+  canceled: boolean
+
+  @Prop({
+    select: false,
+    default: null
+  })
+  trialExpiryDate: Date | null
 }
 
 @Schema({
@@ -80,7 +92,9 @@ export class User {
   @Prop({
     default: {
       subscriptionId: "",
-      isActive: false
+      isActive: false,
+      canceled: false,
+      trialExpiryDate: null
     }
   })
   subscription: Subscription

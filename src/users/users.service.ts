@@ -22,7 +22,7 @@ export class UsersService {
     @Inject(forwardRef(() => AuthService))
     private auth: AuthService,
     private storage: StorageService,
-    private emial: EmailService
+    private email: EmailService
   ) {}
 
   async create(
@@ -102,6 +102,7 @@ export class UsersService {
 
     if (options?.pickSubscriptionData) {
       pickPrivateFields.push("+subscription.subscriptionId")
+      pickPrivateFields.push("+subscription.trialExpiryDate")
     }
 
     const query = "userId" in input ? {
@@ -176,7 +177,10 @@ export class UsersService {
       } else {
         user.password = await bcrypt.hash(input.newPassword, 10)
 
-        await this.emial.sendRecoveryPasswordSuccessfulEmail({email: user.email, name: user.fullName || user.firstName})
+        await this.email.sendRecoveryPasswordSuccessfulEmail({
+          email: user.email,
+          name: user.fullName || user.firstName
+        })
       }
     }
 

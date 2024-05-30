@@ -152,19 +152,14 @@ export class AuthService {
     const user = await this.usersService.findOne({userId}, {
       pickSubscriptionData: true
     })
-    let subscription: Partial<typeof user.subscription> = user.subscription
-
-    if (user.subscription.subscriptionId && user.subscription.isActive) {
-      subscription = {
-        isActive: await this.paymentService.checkSubscription(subscription.subscriptionId)
-      }
-    }
+    const subscription: Partial<typeof user.subscription> = await this.paymentService.checkSubscription(
+      userId,
+      user.subscription
+    )
 
     return {
       ...user,
-      subscription: {
-        isActive: subscription.isActive
-      }
+      subscription
     }
   }
 
@@ -180,19 +175,14 @@ export class AuthService {
     if (!user) {
       throw new BadRequestException("Unable to find user")
     }
-    let subscription: Partial<typeof user.subscription> = user.subscription
-
-    if (user.subscription.subscriptionId && user.subscription.isActive) {
-      subscription = {
-        isActive: await this.paymentService.checkSubscription(subscription.subscriptionId)
-      }
-    }
+    const subscription: Partial<typeof user.subscription> = await this.paymentService.checkSubscription(
+      user._id.toString(),
+      user.subscription
+    )
 
     return {
       ...user,
-      subscription: {
-        isActive: subscription.isActive
-      }
+      subscription
     }
   }
 

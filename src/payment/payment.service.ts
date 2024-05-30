@@ -3,6 +3,7 @@ import {
   Injectable, UnauthorizedException
 } from "@nestjs/common"
 import {ConfigService} from "@nestjs/config"
+import {User} from "src/users/users.schema"
 import Stripe from "stripe"
 import {format} from "date-fns"
 import {UsersService} from "src/users/users.service"
@@ -33,19 +34,33 @@ export class PaymentService {
         object: false
       })
 
-      if (!user.customerId) {
-        const customer = await this.stripe.customers.create({
+      const createNew = async () => {
+        return await this.stripe.customers.create({
           name: user.fullName,
           email: user.email || "",
           metadata: {
             "_id": userId
           }
         })
-
-        user.customerId = customer.id
-
-        await user.save()
       }
+
+      let customer: Stripe.Response<Stripe.Customer>
+
+      if (!user.customerId) {
+        customer = await createNew()
+      } else {
+        customer = await this.stripe.customers.retrieve(user.customerId).catch(() => {
+          return null
+        })
+
+        if (!customer || customer.deleted as unknown as boolean) {
+          customer = await createNew()
+        }
+      }
+
+      user.customerId = customer.id
+
+      await user.save()
 
       return user.customerId
     } catch (err) {
@@ -60,7 +75,7 @@ export class PaymentService {
     try {
       const customerId = await this.getCustomerId(userId)
 
-      return await this.stripe.customers.retrieve(customerId)
+      return await this.stripe.customers.retrieve(customerId) as Stripe.Response<Stripe.Customer>
     } catch (err) {
       console.error(err)
       throw new BadRequestException("Something went wrong")
@@ -137,76 +152,110 @@ export class PaymentService {
     userId: string
   ) {
     try {
-      const user = await this.usersService.findOne({userId})
+      const user = await this.usersService.findOne({userId}, {
+        pickCustomerId: true,
+        pickSubscriptionData: true
+      })
 
-      const customerId = await this.getCustomerId(userId)
-      const paymentMethods = await this.stripe.customers.listPaymentMethods(customerId)
+      const customer = await this.getCustomer(userId)
+      const paymentMethods = await this.stripe.customers.listPaymentMethods(customer.id)
       const prices = await this.getPricing(userId)
       const lastPaymentMethod = paymentMethods.data.sort((a, b) => b.created - a.created)[0]
 
-      await this.stripe.customers.update(customerId, {
+      await this.stripe.customers.update(customer.id, {
         invoice_settings: {
           default_payment_method: lastPaymentMethod.id
         }
       })
 
-      const invoice = await this.stripe.invoices.create({
-        customer: customerId,
-        currency: prices.currency,
-        default_payment_method: lastPaymentMethod.id
-      })
-
-      await this.stripe.invoiceItems.create({
-        invoice: invoice.id,
-        customer: customerId,
-        currency: prices.currency,
-        price: prices.trial.id
-      })
-      await this.stripe.invoices.finalizeInvoice(invoice.id)
-      const paidInvoice = await this.stripe.invoices.pay(invoice.id)
-
+      const trialEnded = user.subscription.trialExpiryDate && (
+        user.subscription.trialExpiryDate.getTime() <= new Date().getTime()
+      )
       const futureTimestamp = Math.floor((Date.now() + 1000 * 60 * 60 * 24 * prices.trial.period) / 1000)
 
-      const subscription = await this.stripe.subscriptions.create({
-        customer: customerId,
-        currency: prices.currency,
-        items: [{price: prices.subscription.id}],
-        billing_cycle_anchor: futureTimestamp,
-        trial_end: futureTimestamp
-      })
+      let paidInvoice: Stripe.Response<Stripe.Invoice> = null
+      let subscription: Stripe.Response<Stripe.Subscription>
 
-      await this.usersService.updateSubscription(userId, {
-        subscriptionId: subscription.id,
-        isActive: true
-      })
+      if (!user.subscription.subscriptionId) {
+        const invoice = await this.stripe.invoices.create({
+          customer: customer.id,
+          currency: prices.currency,
+          default_payment_method: lastPaymentMethod.id
+        })
 
-      const price = `${prices.subscription.description}`
-      const trialExpiresDate = format(new Date(futureTimestamp * 1000), "dd MMM yyyy")
+        await this.stripe.invoiceItems.create({
+          invoice: invoice.id,
+          customer: customer.id,
+          currency: prices.currency,
+          price: prices.trial.id
+        })
 
-      await this.emailService.sendAccountInitialPaymentEmail({
-        email: user.email,
-        name: user.fullName,
-        trialPeriod: prices.trial.period,
-        price,
-        trialExpiresDate
-      })
+        await this.stripe.invoices.finalizeInvoice(invoice.id)
+
+        paidInvoice = await this.stripe.invoices.pay(invoice.id)
+        subscription = await this.stripe.subscriptions.create({
+          customer: customer.id,
+          currency: prices.currency,
+          items: [{price: prices.subscription.id}],
+          billing_cycle_anchor: futureTimestamp,
+          trial_end: futureTimestamp
+        })
+
+        await this.usersService.updateSubscription(userId, {
+          subscriptionId: subscription.id,
+          isActive: true,
+          canceled: false,
+          trialExpiryDate: new Date(futureTimestamp * 1000)
+        })
+
+        const price = `${prices.subscription.description}`
+        const trialExpiryDate = format(new Date(futureTimestamp * 1000), "dd MMM yyyy")
+
+        await this.emailService.sendAccountInitialPaymentEmail({
+          email: user.email,
+          name: user.fullName,
+          trialPeriod: prices.trial.period,
+          price,
+          trialExpiresDate: trialExpiryDate
+        })
+      } else {
+        subscription = await this.stripe.subscriptions.retrieve(user.subscription.subscriptionId)
+
+        if (["active", "trialing"].includes(subscription.status) && subscription.cancel_at) {
+          subscription = await this.stripe.subscriptions.update(subscription.id, {
+            cancel_at: null
+          })
+        } else {
+          subscription = await this.stripe.subscriptions.create({
+            customer: customer.id,
+            currency: prices.currency,
+            items: [{price: prices.subscription.id}]
+          })
+        }
+
+        await this.usersService.updateSubscription(userId, {
+          subscriptionId: subscription.id,
+          isActive: true,
+          canceled: false
+        })
+      }
 
       return {
         success: true,
         data: {
-          transaction_id: paidInvoice.payment_intent,
-          currency: paidInvoice.currency,
-          value: paidInvoice.amount_paid,
+          transaction_id: trialEnded ? subscription.latest_invoice : paidInvoice?.payment_intent,
+          currency: prices.currency,
+          value: trialEnded ? parseFloat(prices.subscription.amount) : paidInvoice?.amount_paid,
           customer: {
-            id: paidInvoice.customer,
-            customer_email: paidInvoice.customer_email,
-            customer_name: paidInvoice.customer_name
+            id: customer.id,
+            customer_email: customer.email || "",
+            customer_name: customer.name || ""
           },
           items: [
             {
-              item_id: prices.trial.id,
-              item_name: "Trial",
-              affiliation: paidInvoice.account_name
+              item_id: trialEnded ? prices.subscription.id : prices.trial.id,
+              item_name: trialEnded ? "Subscription" : "Trial",
+              affiliation: paidInvoice?.account_name || "CVwisely.com"
             }
           ]
         }
@@ -218,12 +267,32 @@ export class PaymentService {
   }
 
   async checkSubscription(
-    subscriptionId: string
+    userId: string,
+    userSubscription: Partial<User["subscription"]> | null
   ) {
     try {
-      const subscription = await this.stripe.subscriptions.retrieve(subscriptionId)
+      if (!userSubscription.subscriptionId) {
+        return {
+          isActive: userSubscription.isActive,
+          canceled: userSubscription.canceled,
+          trialExpiryDate: userSubscription.trialExpiryDate
+        }
+      }
 
-      return ["active", "trialing"].includes(subscription.status)
+      const subscription = await this.stripe.subscriptions.retrieve(userSubscription.subscriptionId)
+      const isActive = ["active", "trialing"].includes(subscription.status)
+
+      if (isActive !== userSubscription.isActive) {
+        await this.usersService.updateSubscription(userId, {
+          isActive
+        })
+      }
+
+      return {
+        isActive,
+        canceled: userSubscription.canceled,
+        trialExpiryDate: userSubscription.trialExpiryDate
+      }
     } catch (err) {
       console.error(err)
       throw new BadRequestException("Something went wrong")
@@ -245,18 +314,37 @@ export class PaymentService {
         throw new UnauthorizedException("Unable to find user")
       }
 
-      const sub = await this.stripe.subscriptions.cancel(user.subscription.subscriptionId)
+      let trialEnded = Boolean(user.subscription.trialExpiryDate && (
+        user.subscription.trialExpiryDate.getTime() <= new Date().getTime()
+      ))
+      let cancelTimestamp: number
 
-      await this.usersService.updateSubscription(userId, {
-        subscriptionId: null,
-        isActive: false
+      if (trialEnded) {
+        const subscription = await this.stripe.subscriptions.retrieve(user.subscription.subscriptionId)
+
+        cancelTimestamp = subscription.current_period_end
+      } else {
+        cancelTimestamp = user.subscription.trialExpiryDate.getTime() / 1000
+      }
+
+      const sub = await this.stripe.subscriptions.update(user.subscription.subscriptionId, {
+        cancel_at: cancelTimestamp
       })
 
-      if (sub) {
-        const expiresDate = format(new Date(sub.current_period_end * 1000), "dd MMM yyyy")
+      await this.usersService.updateSubscription(userId, {
+        subscriptionId: user.subscription.subscriptionId,
+        isActive: false,
+        canceled: true
+      })
 
-        await this.emailService.sendAccountSubscriptionCancelationEmail({email: user.email, name: user.fullName, expiresDate})
-      }
+      const subscriptionPeriodEnd = new Date(sub.current_period_end * 1000)
+      const expiryDate = format(subscriptionPeriodEnd, "dd MMM yyyy")
+
+      await this.emailService.sendAccountSubscriptionCancellationEmail({
+        email: user.email,
+        name: user.fullName,
+        expiresDate: expiryDate
+      })
 
       return {
         success: true

@@ -158,7 +158,7 @@ export class EmailService {
     return
   }
 
-  async sendAccountSubscriptionCancelationEmail(input: {
+  async sendAccountSubscriptionCancellationEmail(input: {
     email: string
     name: string
     expiresDate:string
@@ -189,7 +189,7 @@ export class EmailService {
     name: string
     trialPeriod: number
     price: string
-    trialExpiresDate:string
+    trialExpiresDate?: string
   }) {
     try {
       await sgMail.send({
@@ -201,7 +201,7 @@ export class EmailService {
         templateId: this.configService.get("sendGrid.templates.emailAccountInitialPayment"),
         dynamicTemplateData: {
           user_name: input.name,
-          trial_period_days: input.trialPeriod,
+          trial_period_days: input.trialPeriod || 0,
           trial_expires_date: input.trialExpiresDate,
           price: input.price,
           button_url: `${this.configService.get("frontendUrl")}/auth/login`
