@@ -162,8 +162,6 @@ export class PaymentService {
       const customer = await this.getCustomer(userId)
 
       if (setupIntentId) {
-        console.log(">>>", setupIntentId)
-
         try {
           const intent = await this.stripe.setupIntents.retrieve(setupIntentId)
 
