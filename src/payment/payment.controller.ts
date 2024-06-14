@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -36,9 +37,10 @@ export class PaymentController {
 
   @Post("subscription")
   async buySubscription(
-    @Request() req: {user: UserFromToken}
+    @Request() req: {user: UserFromToken},
+    @Body() body?: {setupIntentId?: string}
   ) {
-    return this.paymentService.buySubscription(req.user._id)
+    return this.paymentService.buySubscription(req.user._id, body.setupIntentId)
   }
 
   @Delete("subscription")

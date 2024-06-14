@@ -150,7 +150,8 @@ export class PaymentService {
   }
 
   async buySubscription(
-    userId: string
+    userId: string,
+    setupIntentId?: string
   ) {
     try {
       const user = await this.usersService.findOne({userId}, {
@@ -159,6 +160,21 @@ export class PaymentService {
       })
 
       const customer = await this.getCustomer(userId)
+
+      if (setupIntentId) {
+        console.log(">>>", setupIntentId)
+
+        try {
+          const intent = await this.stripe.setupIntents.retrieve(setupIntentId)
+
+          if (intent.status !== "succeeded" || intent.customer !== customer.id) {
+            throw new BadRequestException("Invalid setup intent")
+          }
+        } catch {
+          throw new BadRequestException("Invalid setup intent")
+        }
+      }
+
       const paymentMethods = await this.stripe.customers.listPaymentMethods(customer.id)
       const prices = await this.getPricing(userId)
       const lastPaymentMethod = paymentMethods.data.sort((a, b) => b.created - a.created)[0]
