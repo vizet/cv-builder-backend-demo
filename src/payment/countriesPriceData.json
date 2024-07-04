@@ -115,6 +115,16 @@
     "trialDays": 7
   },
   {
+    "country": "OM",
+    "key": "15",
+    "trialDays": 7
+  },
+  {
+    "country": "BH",
+    "key": "15",
+    "trialDays": 7
+  },
+  {
     "country": "GB",
     "key": "16",
     "trialDays": 7
