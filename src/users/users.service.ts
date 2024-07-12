@@ -137,6 +137,7 @@ export class UsersService {
       newPassword: string
       newResetPassword: string
     }>,
+    locale: string,
     avatar?: Express.Multer.File
   ) {
     const user = await this.findOne({
@@ -180,7 +181,7 @@ export class UsersService {
         await this.email.sendRecoveryPasswordSuccessfulEmail({
           email: user.email,
           name: user.fullName || user.firstName
-        })
+        }, locale)
       }
     }
 
