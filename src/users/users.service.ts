@@ -43,6 +43,22 @@ export class UsersService {
     }
   }
 
+  @Cron("0 0 */10 * * *")
+  async sendReminder2st() {
+    try {
+      const users = await this.userModel.find({"subscription.isActive": false})
+
+      const promises = []
+      for (const user of users) {
+        promises.push(this.email.sendReminder2stEmail({email: user.email, name: user.fullName, locale: user.country || "en"}))
+      }
+
+      Promise.all(promises)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   async create(
     input: {
       email: User["email"]

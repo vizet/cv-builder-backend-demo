@@ -20,7 +20,8 @@ export default () => ({
         emailSignUpWithGoogleSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_SIGNUP_WITH_GOOGLE_SUCCESSFUL,
         emailAccountSubscriptionCancelation: process.env.SENDGRID_TEMPLATE_EMAIL_ACCOUNT_SUBSCRIPTION_CANCELATION,
         emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_ACCOUNT_INITIAL_PAYMENT,
-        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_REMINDER_1ST
+        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_REMINDER_1ST,
+        emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_REMINDER_2ST
       },
       ro: {
         emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_RO_CONFIRM,
@@ -31,7 +32,8 @@ export default () => ({
         emailSignUpWithGoogleSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_RO_SIGNUP_WITH_GOOGLE_SUCCESSFUL,
         emailAccountSubscriptionCancelation: process.env.SENDGRID_TEMPLATE_EMAIL_RO_ACCOUNT_SUBSCRIPTION_CANCELATION,
         emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_RO_ACCOUNT_INITIAL_PAYMENT,
-        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_RO_REMINDER_1ST
+        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_RO_REMINDER_1ST,
+        emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_RO_REMINDER_2ST
       }
     }
   },
