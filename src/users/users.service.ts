@@ -7,7 +7,7 @@ import {
   UnauthorizedException
 } from "@nestjs/common"
 import {InjectModel} from "@nestjs/mongoose"
-import {Cron, CronExpression, SchedulerRegistry} from "@nestjs/schedule"
+import {Cron, SchedulerRegistry} from "@nestjs/schedule"
 import {omit} from "lodash"
 import {Model} from "mongoose"
 import {AuthService} from "src/auth/auth.service"
@@ -27,17 +27,14 @@ export class UsersService {
     private scheduler: SchedulerRegistry,
   ) {}
 
-  // @Cron("0 0 */5 * * *")
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron("0 0 */5 * * *")
   async sendReminder1st() {
     try {
       const users = await this.userModel.find({"subscription.isActive": false})
 
       const promises = []
       for (const user of users) {
-        if (user.email === "alexey.bagishev.dev@gmail.com") {
-          promises.push(this.email.sendReminder1stEmail({email: user.email, name: user.fullName}))
-        }
+        promises.push(this.email.sendReminder1stEmail({email: user.email, name: user.fullName}))
       }
 
       Promise.all(promises)
@@ -45,6 +42,7 @@ export class UsersService {
       console.error(err)
     }
   }
+
   async create(
     input: {
       email: User["email"]
