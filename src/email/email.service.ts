@@ -219,15 +219,18 @@ export class EmailService {
   async sendReminder1stEmail(input: {
     email: string
     name: string
+    locale: string
   }){
     try {
+      const templateWithLocale = this.configService.get(`sendGrid.templates.${input.locale.toLocaleLowerCase()}.emailReminder1st`) || this.configService.get("sendGrid.templates.en.emailReminder1st")
+
       await sgMail.send({
         to: input.email,
         from: {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
         },
-        templateId: this.configService.get(`sendGrid.templates.${"en"}.emailReminder1st`),
+        templateId: templateWithLocale,
         dynamicTemplateData: {
           user_name: input.name,
           button_url: `${this.configService.get("frontendUrl")}/dashboard?utm_source=reminder_email_1st&utm_medium=reminder_email_1st&utm_campaign=reminder_email_1st`

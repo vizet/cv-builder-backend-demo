@@ -7,7 +7,7 @@ import {
   UnauthorizedException
 } from "@nestjs/common"
 import {InjectModel} from "@nestjs/mongoose"
-import {Cron, SchedulerRegistry} from "@nestjs/schedule"
+import {Cron, CronExpression, SchedulerRegistry} from "@nestjs/schedule"
 import {omit} from "lodash"
 import {Model} from "mongoose"
 import {AuthService} from "src/auth/auth.service"
@@ -34,7 +34,7 @@ export class UsersService {
 
       const promises = []
       for (const user of users) {
-        promises.push(this.email.sendReminder1stEmail({email: user.email, name: user.fullName}))
+        promises.push(this.email.sendReminder1stEmail({email: user.email, name: user.fullName, locale: user.country || "en"}))
       }
 
       Promise.all(promises)
