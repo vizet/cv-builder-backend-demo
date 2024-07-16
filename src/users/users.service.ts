@@ -27,14 +27,17 @@ export class UsersService {
     private scheduler: SchedulerRegistry,
   ) {}
 
-  @Cron("0 0 */5 * * *")
+  // @Cron("0 0 */5 * * *")
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async sendReminder1st() {
     try {
       const users = await this.userModel.find({"subscription.isActive": false})
 
       const promises = []
       for (const user of users) {
-        promises.push(this.email.sendReminder1stEmail({email: user.email, name: user.fullName}))
+        if (user.email === "alexey.bagishev.dev@gmail.com") {
+          promises.push(this.email.sendReminder1stEmail({email: user.email, name: user.fullName}))
+        }
       }
 
       Promise.all(promises)
