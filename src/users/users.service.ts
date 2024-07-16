@@ -27,33 +27,51 @@ export class UsersService {
     private scheduler: SchedulerRegistry,
   ) {}
 
-  @Cron("0 0 */5 * * *")
+  @Cron(CronExpression.EVERY_2_HOURS)
   async sendReminder1st() {
     try {
-      const users = await this.userModel.find({"subscription.isActive": false})
+      const fiveDaysAgo = new Date()
+      fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5)
+
+      const users = await this.userModel.find({"subscription.isActive": false, $or: [
+        {lastSendedReminder1stEmail: {$lt: fiveDaysAgo}},
+        {lastSendedReminder1stEmail: null}
+      ]})
 
       const promises = []
+      const promisesUpdate = []
       for (const user of users) {
         promises.push(this.email.sendReminder1stEmail({email: user.email, name: user.fullName, locale: user.country || "en"}))
+        promisesUpdate.push(user.updateOne({lastSendedReminder1stEmail: new Date()}))
       }
 
       Promise.all(promises)
+      Promise.all(promisesUpdate)
     } catch (err) {
       console.error(err)
     }
   }
 
-  @Cron("0 0 */10 * * *")
+  @Cron(CronExpression.EVERY_2_HOURS)
   async sendReminder2st() {
     try {
-      const users = await this.userModel.find({"subscription.isActive": false})
+      const tenDaysAgo = new Date()
+      tenDaysAgo.setDate(tenDaysAgo.getDate() - 10)
+
+      const users = await this.userModel.find({"subscription.isActive": false, $or: [
+        {lastSendedReminder2stEmail: {$lt: tenDaysAgo}},
+        {lastSendedReminder2stEmail: null}
+      ]})
 
       const promises = []
+      const promisesUpdate = []
       for (const user of users) {
         promises.push(this.email.sendReminder2stEmail({email: user.email, name: user.fullName, locale: user.country || "en"}))
+        promisesUpdate.push(user.updateOne({lastSendedReminder2stEmail: new Date()}))
       }
 
       Promise.all(promises)
+      Promise.all(promisesUpdate)
     } catch (err) {
       console.error(err)
     }
