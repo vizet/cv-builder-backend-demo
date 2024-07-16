@@ -215,4 +215,27 @@ export class EmailService {
 
     return
   }
+
+  async sendReminder1stEmail(input: {
+    email: string
+    name: string
+  }){
+    try {
+      await sgMail.send({
+        to: input.email,
+        from: {
+          email: this.configService.get("sendGrid.emailFrom"),
+          name: this.configService.get("sendGrid.emailFromName")
+        },
+        templateId: this.configService.get(`sendGrid.templates.${"en"}.emailReminder1st`),
+        dynamicTemplateData: {
+          user_name: input.name,
+          button_url: `${this.configService.get("frontendUrl")}/dashboard?utm_source=reminder_email_1st&utm_medium=reminder_email_1st&utm_campaign=reminder_email_1st`
+        }
+      })
+    } catch (err) {
+      console.error(err)
+      
+    }
+  }
 }
