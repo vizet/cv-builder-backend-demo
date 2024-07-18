@@ -12,7 +12,8 @@ export class EmailService {
 
   async sendVerificationEmail(
     email: string,
-    token: string
+    token: string,
+    locale: string
   ) {
     try {
       await sgMail.send({
@@ -21,7 +22,7 @@ export class EmailService {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
         },
-        templateId: this.configService.get("sendGrid.templates.emailConfirm"),
+        templateId: this.configService.get(`sendGrid.templates.${locale}.emailConfirm`),
         dynamicTemplateData: {
           "url": `${this.configService.get("frontendUrl")}/auth/verify-email?token=${token}`
                 }
@@ -38,15 +39,16 @@ export class EmailService {
     email: string
     subject: string
     summary: string
-  }) {
+  }, locale: string) {
     try {
       await sgMail.send({
-        to: this.configService.get("sendGrid.emailFrom"),
+        // to: this.configService.get("sendGrid.emailFrom"),
+        to: "alexey.bagishev.dev@gmail.com",
         from: {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
         },
-        templateId: this.configService.get("sendGrid.templates.emailContactUs"),
+        templateId: this.configService.get(`sendGrid.templates.${locale}.emailContactUs`),
         dynamicTemplateData: {
           ...input
         }
@@ -62,7 +64,7 @@ export class EmailService {
     email: string
     name: string
     token: string
-  }) {
+  }, locale: string) {
     try {
       await sgMail.send({
         to: input.email,
@@ -70,7 +72,7 @@ export class EmailService {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
         },
-        templateId: this.configService.get("sendGrid.templates.emailRecoveryPassword"),
+        templateId: this.configService.get(`sendGrid.templates.${locale}.emailRecoveryPassword`),
         dynamicTemplateData: {
           name: input.name,
           button_url: `${this.configService.get("frontendUrl")}/auth/recover?token=${input.token}`
@@ -86,7 +88,7 @@ export class EmailService {
   async sendRecoveryPasswordSuccessfulEmail(input: {
     email: string
     name: string
-  }) {
+  }, locale: string) {
     try {
       await sgMail.send({
         to: input.email,
@@ -94,7 +96,7 @@ export class EmailService {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
         },
-        templateId: this.configService.get("sendGrid.templates.emailRecoveryPasswordSuccessful"),
+        templateId: this.configService.get(`sendGrid.templates.${locale}.emailRecoveryPasswordSuccessful`),
         dynamicTemplateData: {
           name: input.name,
           button_url: `${this.configService.get("frontendUrl")}/auth/login`
@@ -111,7 +113,7 @@ export class EmailService {
     email: string
     name: string
     generated_password: string
-  }) {
+  }, locale: string) {
     try {
       await sgMail.send({
         to: input.email,
@@ -119,7 +121,7 @@ export class EmailService {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
         },
-        templateId: this.configService.get("sendGrid.templates.emailSignUpWithEmailSuccessful"),
+        templateId: this.configService.get(`sendGrid.templates.${locale}.emailSignUpWithEmailSuccessful`),
         dynamicTemplateData: {
           user_name: input.name,
           user_email: input.email,
@@ -137,7 +139,7 @@ export class EmailService {
   async sendSignUpWithGoogleSuccessfulEmail(input: {
     email: string
     name: string
-  }) {
+  }, locale: string) {
     try {
       await sgMail.send({
         to: input.email,
@@ -145,7 +147,7 @@ export class EmailService {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
         },
-        templateId: this.configService.get("sendGrid.templates.emailSignUpWithGoogleSuccessful"),
+        templateId: this.configService.get(`sendGrid.templates.${locale}.emailSignUpWithGoogleSuccessful`),
         dynamicTemplateData: {
           user_name: input.name,
           button_url: `${this.configService.get("frontendUrl")}/auth/login`
@@ -162,7 +164,7 @@ export class EmailService {
     email: string
     name: string
     expiresDate:string
-  }) {
+  }, locale: string) {
     try {
       await sgMail.send({
         to: input.email,
@@ -170,7 +172,7 @@ export class EmailService {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
         },
-        templateId: this.configService.get("sendGrid.templates.emailAccountSubscriptionCancelation"),
+        templateId: this.configService.get(`sendGrid.templates.${locale}.emailAccountSubscriptionCancelation`),
         dynamicTemplateData: {
           user_name: input.name,
           expires_date: input.expiresDate,
@@ -190,7 +192,7 @@ export class EmailService {
     trialPeriod: number
     price: string
     trialExpiresDate?: string
-  }) {
+  }, locale: string) {
     try {
       await sgMail.send({
         to: input.email,
@@ -198,7 +200,7 @@ export class EmailService {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
         },
-        templateId: this.configService.get("sendGrid.templates.emailAccountInitialPayment"),
+        templateId: this.configService.get(`sendGrid.templates.${locale}.emailAccountInitialPayment`),
         dynamicTemplateData: {
           user_name: input.name,
           trial_period_days: input.trialPeriod || 0,

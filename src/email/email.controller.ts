@@ -1,4 +1,4 @@
-import {Body, Controller, Post} from "@nestjs/common"
+import {Body, Controller, Post, Req} from "@nestjs/common"
 import {Public} from "src/auth/auth.decorators"
 import {EmailService} from "./email.service"
 
@@ -9,9 +9,10 @@ export class EmailController {
   @Public()
   @Post("contact-us")
   sendContactUsEmail(
+    @Req() req: Request,
     @Body() input: { name: string, email: string, subject: string, summary: string }
   ) {
     input.email = input.email.toLowerCase()
-    return this.emailService.sendContactUsEmail(input)
+    return this.emailService.sendContactUsEmail(input, req.headers[process.env.REQ_HEADERS_LOCALE] || "en")
   }
 }

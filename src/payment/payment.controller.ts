@@ -5,7 +5,7 @@ import {
   Get,
   Post,
   Query,
-  Request
+  Req
 } from "@nestjs/common"
 import {Public} from "src/auth/auth.decorators"
 import {UserFromToken} from "src/auth/auth.service"
@@ -20,7 +20,7 @@ export class PaymentController {
   @Public()
   @Get("pricing")
   async getPricing(
-    @Request() req: {user?: UserFromToken},
+    @Req() req: {user?: UserFromToken},
     @Query() query: {
       country: string
     }
@@ -30,23 +30,23 @@ export class PaymentController {
 
   @Post("intent")
   async createPaymentIntent(
-    @Request() req: {user: UserFromToken}
+    @Req() req: {user: UserFromToken}
   ) {
     return this.paymentService.createIntent(req.user._id)
   }
 
   @Post("subscription")
   async buySubscription(
-    @Request() req: {user: UserFromToken},
+    @Req() req: Request & {user: UserFromToken},
     @Body() body?: {setupIntentId?: string}
   ) {
-    return this.paymentService.buySubscription(req.user._id, body.setupIntentId)
+    return this.paymentService.buySubscription(req.user._id, req.headers[process.env.REQ_HEADERS_LOCALE] || "en", body.setupIntentId)
   }
 
   @Delete("subscription")
   async cancelSubscription(
-    @Request() req: {user: UserFromToken},
+    @Req() req: Request & {user: UserFromToken},
   ) {
-    return this.paymentService.cancelSubscription(req.user._id)
+    return this.paymentService.cancelSubscription(req.user._id, req.headers[process.env.REQ_HEADERS_LOCALE] || "en")
   }
 }
