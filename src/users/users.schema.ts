@@ -115,6 +115,16 @@ export class User {
   lastName: string
 
   fullName: string
+
+  @Prop({
+    default: new Date()
+  })
+  lastSendedReminder1stEmail: Date
+
+  @Prop({
+    default: new Date()
+  })
+  lastSendedReminder2stEmail: Date
 }
 
 const UsersSchema = SchemaFactory.createForClass(User)

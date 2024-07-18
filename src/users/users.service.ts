@@ -7,6 +7,7 @@ import {
   UnauthorizedException
 } from "@nestjs/common"
 import {InjectModel} from "@nestjs/mongoose"
+import {Cron, CronExpression, SchedulerRegistry} from "@nestjs/schedule"
 import {omit} from "lodash"
 import {Model} from "mongoose"
 import {AuthService} from "src/auth/auth.service"
@@ -22,8 +23,59 @@ export class UsersService {
     @Inject(forwardRef(() => AuthService))
     private auth: AuthService,
     private storage: StorageService,
-    private email: EmailService
+    private email: EmailService,
+    private scheduler: SchedulerRegistry,
   ) {}
+
+  @Cron(CronExpression.EVERY_2_HOURS)
+  async sendReminder1st() {
+    try {
+      const fiveDaysAgo = new Date()
+      fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5)
+
+      const users = await this.userModel.find({"subscription.isActive": false, $or: [
+        {lastSendedReminder1stEmail: {$lt: fiveDaysAgo}},
+        {lastSendedReminder1stEmail: null}
+      ]})
+
+      const promises = []
+      const promisesUpdate = []
+      for (const user of users) {
+        promises.push(this.email.sendReminder1stEmail({email: user.email, name: user.fullName, locale: user.country || "en"}))
+        promisesUpdate.push(user.updateOne({lastSendedReminder1stEmail: new Date()}))
+      }
+
+      Promise.all(promises)
+      Promise.all(promisesUpdate)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  @Cron(CronExpression.EVERY_2_HOURS)
+  async sendReminder2st() {
+    try {
+      const tenDaysAgo = new Date()
+      tenDaysAgo.setDate(tenDaysAgo.getDate() - 10)
+
+      const users = await this.userModel.find({"subscription.isActive": false, $or: [
+        {lastSendedReminder2stEmail: {$lt: tenDaysAgo}},
+        {lastSendedReminder2stEmail: null}
+      ]})
+
+      const promises = []
+      const promisesUpdate = []
+      for (const user of users) {
+        promises.push(this.email.sendReminder2stEmail({email: user.email, name: user.fullName, locale: user.country || "en"}))
+        promisesUpdate.push(user.updateOne({lastSendedReminder2stEmail: new Date()}))
+      }
+
+      Promise.all(promises)
+      Promise.all(promisesUpdate)
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   async create(
     input: {

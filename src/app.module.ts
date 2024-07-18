@@ -3,6 +3,7 @@ import {ConfigModule, ConfigService} from "@nestjs/config"
 import {APP_GUARD} from "@nestjs/core"
 import {JwtModule} from "@nestjs/jwt"
 import {MongooseModule} from "@nestjs/mongoose"
+import {ScheduleModule} from "@nestjs/schedule"
 import {AuthGuard} from "src/auth/auth.guard"
 import config from "src/config"
 import {AppController} from "src/app.controller"
@@ -12,9 +13,9 @@ import {PaymentModule} from "src/payment/payment.module"
 import {ResumeModule} from "src/resume/resume.module"
 import {UsersModule} from "src/users/users.module"
 import {StorageModule} from "./storage/storage.module"
-
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [".env", ".env.local"],
