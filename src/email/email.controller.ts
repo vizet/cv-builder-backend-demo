@@ -13,6 +13,6 @@ export class EmailController {
     @Body() input: { name: string, email: string, subject: string, summary: string }
   ) {
     input.email = input.email.toLowerCase()
-    return this.emailService.sendContactUsEmail(input, req.headers[process.env.REQ_HEADERS_LOCALE] || "en")
+    return this.emailService.sendContactUsEmail(input)
   }
 }

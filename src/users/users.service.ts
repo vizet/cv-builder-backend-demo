@@ -41,7 +41,7 @@ export class UsersService {
       const promises = []
       const promisesUpdate = []
       for (const user of users) {
-        promises.push(this.email.sendReminder1stEmail({email: user.email, name: user.fullName, locale: user.country || "en"}))
+        promises.push(this.email.sendReminder1stEmail({email: user.email, name: user.fullName, locale: user.country}))
         promisesUpdate.push(user.updateOne({lastSendedReminder1stEmail: new Date()}))
       }
 
@@ -66,7 +66,7 @@ export class UsersService {
       const promises = []
       const promisesUpdate = []
       for (const user of users) {
-        promises.push(this.email.sendReminder2stEmail({email: user.email, name: user.fullName, locale: user.country || "en"}))
+        promises.push(this.email.sendReminder2stEmail({email: user.email, name: user.fullName, locale: user.country}))
         promisesUpdate.push(user.updateOne({lastSendedReminder2stEmail: new Date()}))
       }
 
@@ -189,7 +189,6 @@ export class UsersService {
       newPassword: string
       newResetPassword: string
     }>,
-    locale: string,
     avatar?: Express.Multer.File
   ) {
     const user = await this.findOne({
@@ -233,7 +232,7 @@ export class UsersService {
         await this.email.sendRecoveryPasswordSuccessfulEmail({
           email: user.email,
           name: user.fullName || user.firstName
-        }, locale)
+        }, user.country)
       }
     }
 

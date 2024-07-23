@@ -9,7 +9,6 @@ export default () => ({
     apiKey: process.env.SENDGRID_API_KEY,
     emailFrom: process.env.SENDGRID_EMAIL_FROM,
     emailFromName: "CVwisely",
-    headersLocaleKey: "x-locale",
     templates: {
       en: {
         emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_CONFIRM,
@@ -34,6 +33,18 @@ export default () => ({
         emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_RO_ACCOUNT_INITIAL_PAYMENT,
         emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_RO_REMINDER_1ST,
         emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_RO_REMINDER_2ST
+      },
+      tr: {
+        emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_TR_CONFIRM,
+        emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_TR_CONTACT_US,
+        emailRecoveryPassword: process.env.SENDGRID_TEMPLATE_EMAIL_TR_RECOVERY_PASSWORD,
+        emailRecoveryPasswordSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_TR_RECOVERY_PASSWORD_SUCCESSFUL,
+        emailSignUpWithEmailSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_TR_SIGNUP_WITH_EMAIL_SUCCESSFUL,
+        emailSignUpWithGoogleSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_TR_SIGNUP_WITH_GOOGLE_SUCCESSFUL,
+        emailAccountSubscriptionCancelation: process.env.SENDGRID_TEMPLATE_EMAIL_TR_ACCOUNT_SUBSCRIPTION_CANCELATION,
+        emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_TR_ACCOUNT_INITIAL_PAYMENT,
+        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_TR_REMINDER_1ST,
+        emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_TR_REMINDER_2ST
       }
     }
   },

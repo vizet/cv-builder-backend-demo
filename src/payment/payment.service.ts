@@ -151,7 +151,6 @@ export class PaymentService {
 
   async buySubscription(
     userId: string,
-    locale: string,
     setupIntentId?: string
   ) {
     try {
@@ -234,7 +233,7 @@ export class PaymentService {
           trialPeriod: prices.trial.period,
           price,
           trialExpiresDate: trialExpiryDate
-        }, locale)
+        }, user.country)
       } else {
         subscription = await this.stripe.subscriptions.retrieve(user.subscription.subscriptionId)
 
@@ -317,8 +316,7 @@ export class PaymentService {
   }
 
   async cancelSubscription(
-    userId: string,
-    locale: string
+    userId: string
   ) {
     try {
       const user = await this.usersService.findOne({
@@ -362,7 +360,7 @@ export class PaymentService {
         email: user.email,
         name: user.fullName,
         expiresDate: expiryDate
-      }, locale)
+      }, user.country)
 
       return {
         success: true
