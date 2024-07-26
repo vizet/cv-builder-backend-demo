@@ -58,15 +58,14 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(input.password, 10)
-    const country = countriesPriceData.find(c => c.country === input.country)?.country
 
     const user = await this.usersService.create({
       email: input.email,
       password: hashedPassword,
-      country: country
+      country: input.country
     })
 
-    this.emailService.sendSignUpWithGoogleSuccessfulEmail({name: user.fullName, email: user.email}, user.country)
+    this.emailService.sendSignUpWithGoogleSuccessfulEmail({name: user.fullName, email: user.email}, input.country)
 
     return {
       accessToken: this.jwtService.sign({
@@ -85,17 +84,16 @@ export class AuthService {
 
     const salt = crypto.randomUUID()
     const hashedPassword = await bcrypt.hash(salt, 10)
-    const country = countriesPriceData.find(c => c.country === input.country)?.country
 
     const user = await this.usersService.create({
       email: input.email,
       firstName: input.firstName,
       lastName: input.lastName,
       password: hashedPassword,
-      country: country
+      country: input.country
     })
 
-    await this.emailService.sendSignUpWithEmailSuccessfulEmail({email: user.email, name: user.fullName, generated_password: salt}, user.country)
+    await this.emailService.sendSignUpWithEmailSuccessfulEmail({email: user.email, name: user.fullName, generated_password: salt}, input.country)
 
     return {
       accessToken: this.jwtService.sign({
