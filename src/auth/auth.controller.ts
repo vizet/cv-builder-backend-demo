@@ -23,7 +23,7 @@ export class AuthController {
 
   @Public()
   @Post("signup")
-  async signup(@Body() user: Pick<UserDocument, "email" | "password">) {
+  async signup(@Body() user: Pick<UserDocument, "email" | "password" | "country">) {
     user.email = user.email.toLowerCase()
     return this.authService.signup(user)
   }
@@ -32,12 +32,11 @@ export class AuthController {
   @Post("signup-without-password")
   async signupWithoutPassword(
     @Req() req: Request,
-    @Body() user: Pick<UserDocument, "email" | "firstName" | "lastName">
+    @Body() user: Pick<UserDocument, "email" | "firstName" | "lastName" | "country">
   ) {
     user.email = user.email.toLowerCase()
     return this.authService.signupWithoutPassword(
-      user,
-      req.headers[process.env.REQ_HEADERS_LOCALE] || "en"
+      user
     )
   }
 
@@ -55,8 +54,7 @@ export class AuthController {
   async loginGoogle(@Request() req) {
     req.user.email = req.user.email.toLowerCase()
     return this.authService.loginGoogle(
-      req.user,
-      req.headers[process.env.REQ_HEADERS_LOCALE] || "en"
+      req.user
     )
   }
 
@@ -96,7 +94,7 @@ export class AuthController {
     @UploadedFile() avatar: Express.Multer.File
   ) {
     body.email && (body.email = body.email.toLowerCase())
-    return await this.authService.updateProfile(req.user._id, req.headers[process.env.REQ_HEADERS_LOCALE] || "en", body, avatar)
+    return await this.authService.updateProfile(req.user._id, body, avatar)
   }
 
   @Get("send-verification-email")
@@ -114,8 +112,7 @@ export class AuthController {
   @Post("recovery-password")
   async recoveryPasswordEmail(@Req() req: Request, @Body() input: { email: string }) {
     return await this.authService.recoveryPasswordEmail(
-      input.email.toLowerCase(),
-      req.headers[process.env.REQ_HEADERS_LOCALE] || "en"
+      input.email.toLowerCase()
     )
   }
 
@@ -128,8 +125,7 @@ export class AuthController {
   ) {
     return await this.authService.recoveryPasswordEmailResetPassword(
       token,
-      input.newPassword,
-      req.headers[process.env.REQ_HEADERS_LOCALE] || "en"
+      input.newPassword
     )
   }
 }

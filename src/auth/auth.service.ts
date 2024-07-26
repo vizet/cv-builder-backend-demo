@@ -14,6 +14,7 @@ import {PaymentService} from "src/payment/payment.service"
 import {User, UserDocument, UserObject} from "src/users/users.schema"
 import {UsersService} from "src/users/users.service"
 import * as bcrypt from "bcrypt"
+import * as countriesPriceData from "../payment/countriesPriceData.json"
 
 export type UserFromToken = {
   _id: string
@@ -51,17 +52,21 @@ export class AuthService {
     return omit(user, ["password"])
   }
 
-  async signup(input: Pick<UserDocument, "email" | "password">) {
+  async signup(input: Pick<UserDocument, "email" | "password" | "country">) {
     if (!input.email || !input.password) {
       throw new BadRequestException("Invalid email or password")
     }
 
     const hashedPassword = await bcrypt.hash(input.password, 10)
+    const country = countriesPriceData.find(c => c.country === input.country)?.country
 
     const user = await this.usersService.create({
       email: input.email,
-      password: hashedPassword
+      password: hashedPassword,
+      country: country
     })
+
+    this.emailService.sendSignUpWithGoogleSuccessfulEmail({name: user.fullName, email: user.email}, user.country)
 
     return {
       accessToken: this.jwtService.sign({
@@ -73,22 +78,24 @@ export class AuthService {
     }
   }
 
-  async signupWithoutPassword(input: Pick<UserDocument, "email" | "firstName" | "lastName">, locale: string) {
+  async signupWithoutPassword(input: Pick<UserDocument, "email" | "firstName" | "lastName" | "country">) {
     if (!input.email || !input.firstName || !input.lastName) {
       throw new BadRequestException("Invalid email, first name or last name")
     }
 
     const salt = crypto.randomUUID()
     const hashedPassword = await bcrypt.hash(salt, 10)
+    const country = countriesPriceData.find(c => c.country === input.country)?.country
 
     const user = await this.usersService.create({
       email: input.email,
       firstName: input.firstName,
       lastName: input.lastName,
-      password: hashedPassword
+      password: hashedPassword,
+      country: country
     })
 
-    await this.emailService.sendSignUpWithEmailSuccessfulEmail({email: user.email, name: user.fullName, generated_password: salt}, locale)
+    await this.emailService.sendSignUpWithEmailSuccessfulEmail({email: user.email, name: user.fullName, generated_password: salt}, user.country)
 
     return {
       accessToken: this.jwtService.sign({
@@ -111,7 +118,7 @@ export class AuthService {
 
   async loginGoogle(userData: {
     email: User["email"]
-  } & Partial<User>, locale: string) {
+  } & Partial<User>) {
     try {
       let user = await this.usersService.findOne({
         email: userData.email
@@ -128,7 +135,7 @@ export class AuthService {
         })
 
         if (user) {
-          this.emailService.sendSignUpWithGoogleSuccessfulEmail({name: user.fullName, email: user.email}, locale)
+          this.emailService.sendSignUpWithGoogleSuccessfulEmail({name: user.fullName, email: user.email}, user.country)
         }
       }
 
@@ -188,13 +195,12 @@ export class AuthService {
 
   async updateProfile(
     userId: string,
-    locale: string,
     input?: Partial<User & {
       newPassword: string
     }>,
     avatar?: Express.Multer.File
   ) {
-    return await this.usersService.updateProfile(userId, input, locale, avatar)
+    return await this.usersService.updateProfile(userId, input, avatar)
   }
 
   async createEmailVerification(email: UserObject["email"]) {
@@ -268,7 +274,7 @@ export class AuthService {
     }
   }
 
-  async recoveryPasswordEmail(email: string, locale: string){
+  async recoveryPasswordEmail(email: string){
     try {
       const user = await this.usersService.findOne({email})
 
@@ -277,7 +283,7 @@ export class AuthService {
       } else {
         const token = this.jwtService.sign({userId: user._id})
 
-        await this.emailService.sendRecoveryPasswordEmail({email: user.email, name: user.fullName, token}, locale)
+        await this.emailService.sendRecoveryPasswordEmail({email: user.email, name: user.fullName, token}, user.country)
 
         return {
           success: true
@@ -288,7 +294,7 @@ export class AuthService {
     }
   }
 
-  async recoveryPasswordEmailResetPassword(token: string, password: string, locale: string){
+  async recoveryPasswordEmailResetPassword(token: string, password: string){
     try {
       const tokenData = this.jwtService.verify(token)
 
@@ -300,12 +306,12 @@ export class AuthService {
         if (!user) {
           throw new UnauthorizedException("Cannot reset password")
         } else {
-          const updatedUser = await this.usersService.updateProfile(tokenData.userId, {newResetPassword: password}, locale)
+          const updatedUser = await this.usersService.updateProfile(tokenData.userId, {newResetPassword: password})
 
           if (!updatedUser) {
             throw new UnauthorizedException("Cannot reset password")
           } else {
-            await this.emailService.sendRecoveryPasswordSuccessfulEmail({email: user.email, name: user.fullName}, locale)
+            await this.emailService.sendRecoveryPasswordSuccessfulEmail({email: user.email, name: user.fullName}, user.country)
           }
 
           return {

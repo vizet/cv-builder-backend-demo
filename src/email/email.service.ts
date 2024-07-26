@@ -13,8 +13,10 @@ export class EmailService {
   async sendVerificationEmail(
     email: string,
     token: string,
-    locale: string
+    locale?: string
   ) {
+    const templateWithLocale = this.configService.get(`sendGrid.templates.${locale?.toLocaleLowerCase()}.emailConfirm`) || this.configService.get("sendGrid.templates.en.emailConfirm")
+
     try {
       await sgMail.send({
         to: email,
@@ -22,7 +24,7 @@ export class EmailService {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
         },
-        templateId: this.configService.get(`sendGrid.templates.${locale}.emailConfirm`),
+        templateId: templateWithLocale,
         dynamicTemplateData: {
           "url": `${this.configService.get("frontendUrl")}/auth/verify-email?token=${token}`
                 }
@@ -39,16 +41,17 @@ export class EmailService {
     email: string
     subject: string
     summary: string
-  }, locale: string) {
+  }) {
     try {
+      const templateWithLocale = this.configService.get("sendGrid.templates.en.emailContactUs")
+
       await sgMail.send({
-        // to: this.configService.get("sendGrid.emailFrom"),
-        to: "alexey.bagishev.dev@gmail.com",
+        to: this.configService.get("sendGrid.emailFrom"),
         from: {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
         },
-        templateId: this.configService.get(`sendGrid.templates.${locale}.emailContactUs`),
+        templateId: templateWithLocale,
         dynamicTemplateData: {
           ...input
         }
@@ -64,22 +67,24 @@ export class EmailService {
     email: string
     name: string
     token: string
-  }, locale: string) {
+  }, locale?: string) {
     try {
+      const templateWithLocale = this.configService.get(`sendGrid.templates.${locale?.toLocaleLowerCase()}.emailRecoveryPassword`) || this.configService.get("sendGrid.templates.en.emailRecoveryPassword")
+
       await sgMail.send({
         to: input.email,
         from: {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
         },
-        templateId: this.configService.get(`sendGrid.templates.${locale}.emailRecoveryPassword`),
+        templateId: templateWithLocale,
         dynamicTemplateData: {
-          name: input.name,
+          user_name: input.name,
           button_url: `${this.configService.get("frontendUrl")}/auth/recover?token=${input.token}`
         }
       })
     } catch (err) {
-      console.error(err)
+      console.error(err.response.body)
     }
 
     return
@@ -88,17 +93,19 @@ export class EmailService {
   async sendRecoveryPasswordSuccessfulEmail(input: {
     email: string
     name: string
-  }, locale: string) {
+  }, locale?: string) {
     try {
+      const templateWithLocale = this.configService.get(`sendGrid.templates.${locale?.toLocaleLowerCase()}.emailRecoveryPasswordSuccessful`) || this.configService.get("sendGrid.templates.en.emailRecoveryPasswordSuccessful")
+
       await sgMail.send({
         to: input.email,
         from: {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
         },
-        templateId: this.configService.get(`sendGrid.templates.${locale}.emailRecoveryPasswordSuccessful`),
+        templateId: templateWithLocale,
         dynamicTemplateData: {
-          name: input.name,
+          user_name: input.name,
           button_url: `${this.configService.get("frontendUrl")}/auth/login`
         }
       })
@@ -113,15 +120,17 @@ export class EmailService {
     email: string
     name: string
     generated_password: string
-  }, locale: string) {
+  }, locale?: string) {
     try {
+      const templateWithLocale = this.configService.get(`sendGrid.templates.${locale?.toLocaleLowerCase()}.emailSignUpWithEmailSuccessful`) || this.configService.get("sendGrid.templates.en.emailSignUpWithEmailSuccessful")
+      
       await sgMail.send({
         to: input.email,
         from: {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
         },
-        templateId: this.configService.get(`sendGrid.templates.${locale}.emailSignUpWithEmailSuccessful`),
+        templateId: templateWithLocale,
         dynamicTemplateData: {
           user_name: input.name,
           user_email: input.email,
@@ -139,15 +148,17 @@ export class EmailService {
   async sendSignUpWithGoogleSuccessfulEmail(input: {
     email: string
     name: string
-  }, locale: string) {
+  }, locale?: string) {
     try {
+      const templateWithLocale = this.configService.get(`sendGrid.templates.${locale?.toLocaleLowerCase()}.emailSignUpWithGoogleSuccessful`) || this.configService.get("sendGrid.templates.en.emailSignUpWithGoogleSuccessful")
+
       await sgMail.send({
         to: input.email,
         from: {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
         },
-        templateId: this.configService.get(`sendGrid.templates.${locale}.emailSignUpWithGoogleSuccessful`),
+        templateId: templateWithLocale,
         dynamicTemplateData: {
           user_name: input.name,
           button_url: `${this.configService.get("frontendUrl")}/auth/login`
@@ -164,15 +175,17 @@ export class EmailService {
     email: string
     name: string
     expiresDate:string
-  }, locale: string) {
+  }, locale?: string) {
     try {
+      const templateWithLocale = this.configService.get(`sendGrid.templates.${locale?.toLocaleLowerCase()}.emailAccountSubscriptionCancelation`) || this.configService.get("sendGrid.templates.en.emailAccountSubscriptionCancelation")
+      
       await sgMail.send({
         to: input.email,
         from: {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
         },
-        templateId: this.configService.get(`sendGrid.templates.${locale}.emailAccountSubscriptionCancelation`),
+        templateId: templateWithLocale,
         dynamicTemplateData: {
           user_name: input.name,
           expires_date: input.expiresDate,
@@ -192,15 +205,17 @@ export class EmailService {
     trialPeriod: number
     price: string
     trialExpiresDate?: string
-  }, locale: string) {
+  }, locale?: string) {
     try {
+      const templateWithLocale = this.configService.get(`sendGrid.templates.${locale?.toLocaleLowerCase()}.emailAccountInitialPayment`) || this.configService.get("sendGrid.templates.en.emailAccountInitialPayment")
+
       await sgMail.send({
         to: input.email,
         from: {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
         },
-        templateId: this.configService.get(`sendGrid.templates.${locale}.emailAccountInitialPayment`),
+        templateId: templateWithLocale,
         dynamicTemplateData: {
           user_name: input.name,
           trial_period_days: input.trialPeriod || 0,
@@ -219,10 +234,10 @@ export class EmailService {
   async sendReminder1stEmail(input: {
     email: string
     name: string
-    locale: string
+    locale?: string
   }){
     try {
-      const templateWithLocale = this.configService.get(`sendGrid.templates.${input.locale.toLocaleLowerCase()}.emailReminder1st`) || this.configService.get("sendGrid.templates.en.emailReminder1st")
+      const templateWithLocale = this.configService.get(`sendGrid.templates.${input.locale?.toLocaleLowerCase()}.emailReminder1st`) || this.configService.get("sendGrid.templates.en.emailReminder1st")
 
       await sgMail.send({
         to: input.email,
@@ -245,10 +260,10 @@ export class EmailService {
   async sendReminder2stEmail(input: {
     email: string
     name: string
-    locale: string
+    locale?: string
   }){
     try {
-      const templateWithLocale = this.configService.get(`sendGrid.templates.${input.locale.toLocaleLowerCase()}.emailReminder2st`) || this.configService.get("sendGrid.templates.en.emailReminder2st")
+      const templateWithLocale = this.configService.get(`sendGrid.templates.${input.locale?.toLocaleLowerCase()}.emailReminder2st`) || this.configService.get("sendGrid.templates.en.emailReminder2st")
 
       await sgMail.send({
         to: input.email,

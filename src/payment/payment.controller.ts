@@ -40,13 +40,13 @@ export class PaymentController {
     @Req() req: Request & {user: UserFromToken},
     @Body() body?: {setupIntentId?: string}
   ) {
-    return this.paymentService.buySubscription(req.user._id, req.headers[process.env.REQ_HEADERS_LOCALE] || "en", body.setupIntentId)
+    return this.paymentService.buySubscription(req.user._id, body.setupIntentId)
   }
 
   @Delete("subscription")
   async cancelSubscription(
     @Req() req: Request & {user: UserFromToken},
   ) {
-    return this.paymentService.cancelSubscription(req.user._id, req.headers[process.env.REQ_HEADERS_LOCALE] || "en")
+    return this.paymentService.cancelSubscription(req.user._id)
   }
 }
