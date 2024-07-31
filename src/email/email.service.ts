@@ -27,7 +27,8 @@ export class EmailService {
         templateId: templateWithLocale,
         dynamicTemplateData: {
           "url": `${this.configService.get("frontendUrl")}/auth/verify-email?token=${token}`
-                }
+        },
+        asm: this.configService.get("sendGrid.unsubscribeAsm")
       })
     } catch (err) {
       console.error(err)
@@ -54,7 +55,8 @@ export class EmailService {
         templateId: templateWithLocale,
         dynamicTemplateData: {
           ...input
-        }
+        },
+        asm: this.configService.get("sendGrid.unsubscribeAsm")
       })
     } catch (err) {
       console.error(err)
@@ -81,7 +83,8 @@ export class EmailService {
         dynamicTemplateData: {
           user_name: input.name,
           button_url: `${this.configService.get("frontendUrl")}/auth/recover?token=${input.token}`
-        }
+        },
+        asm: this.configService.get("sendGrid.unsubscribeAsm")
       })
     } catch (err) {
       console.error(err.response.body)
@@ -107,7 +110,8 @@ export class EmailService {
         dynamicTemplateData: {
           user_name: input.name,
           button_url: `${this.configService.get("frontendUrl")}/auth/login`
-        }
+        },
+        asm: this.configService.get("sendGrid.unsubscribeAsm")
       })
     } catch (err) {
       console.error(err)
@@ -136,7 +140,8 @@ export class EmailService {
           user_email: input.email,
           generated_password: input.generated_password,
           button_url: `${this.configService.get("frontendUrl")}/auth/login`
-        }
+        },
+        asm: this.configService.get("sendGrid.unsubscribeAsm")
       })
     } catch (err) {
       console.error(err)
@@ -162,7 +167,8 @@ export class EmailService {
         dynamicTemplateData: {
           user_name: input.name,
           button_url: `${this.configService.get("frontendUrl")}/auth/login`
-        }
+        },
+        asm: this.configService.get("sendGrid.unsubscribeAsm")
       })
     } catch (err) {
       console.error(err)
@@ -190,7 +196,8 @@ export class EmailService {
           user_name: input.name,
           expires_date: input.expiresDate,
           button_url: `${this.configService.get("frontendUrl")}/auth/login`
-        }
+        },
+        asm: this.configService.get("sendGrid.unsubscribeAsm")
       })
     } catch (err) {
       console.error(err)
@@ -222,7 +229,8 @@ export class EmailService {
           trial_expires_date: input.trialExpiresDate,
           price: input.price,
           button_url: `${this.configService.get("frontendUrl")}/auth/login`
-        }
+        },
+        asm: this.configService.get("sendGrid.unsubscribeAsm")
       })
     } catch (err) {
       console.error(err)
@@ -249,7 +257,8 @@ export class EmailService {
         dynamicTemplateData: {
           user_name: input.name,
           button_url: `${this.configService.get("frontendUrl")}/dashboard?utm_source=reminder_email_1st&utm_medium=reminder_email_1st&utm_campaign=reminder_email_1st`
-        }
+        },
+        asm: this.configService.get("sendGrid.unsubscribeAsm")
       })
     } catch (err) {
       console.error(err)
@@ -275,7 +284,8 @@ export class EmailService {
         dynamicTemplateData: {
           user_name: input.name,
           button_url: `${this.configService.get("frontendUrl")}/dashboard?utm_source=reminder_email_2st&utm_medium=reminder_email_2st&utm_campaign=reminder_email_2st`
-        }
+        },
+        asm: this.configService.get("sendGrid.unsubscribeAsm")
       })
     } catch (err) {
       console.error(err)

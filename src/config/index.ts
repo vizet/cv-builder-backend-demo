@@ -9,6 +9,10 @@ export default () => ({
     apiKey: process.env.SENDGRID_API_KEY,
     emailFrom: process.env.SENDGRID_EMAIL_FROM,
     emailFromName: "CVwisely",
+    unsubscribeAsm: {
+        group_id: 65084,
+        groups_to_display: [65084, 65076]
+    },
     templates: {
       en: {
         emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_CONFIRM,
