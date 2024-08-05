@@ -41,6 +41,9 @@ export class PaymentService {
           email: user.email || "",
           metadata: {
             "_id": userId
+          },
+          tax: {
+            validate_location: "immediately"
           }
         })
       }
@@ -195,7 +198,10 @@ export class PaymentService {
         const invoice = await this.stripe.invoices.create({
           customer: customer.id,
           currency: prices.currency,
-          default_payment_method: lastPaymentMethod.id
+          default_payment_method: lastPaymentMethod.id,
+          automatic_tax: {
+            enabled: true
+          }
         })
 
         await this.stripe.invoiceItems.create({
@@ -213,7 +219,10 @@ export class PaymentService {
           currency: prices.currency,
           items: [{price: prices.subscription.id}],
           billing_cycle_anchor: futureTimestamp,
-          trial_end: futureTimestamp
+          trial_end: futureTimestamp,
+          automatic_tax: {
+            enabled: true
+          }
         })
 
         await this.usersService.updateSubscription(userId, {
@@ -245,7 +254,10 @@ export class PaymentService {
           subscription = await this.stripe.subscriptions.create({
             customer: customer.id,
             currency: prices.currency,
-            items: [{price: prices.subscription.id}]
+            items: [{price: prices.subscription.id}],
+            automatic_tax: {
+              enabled: true
+            }
           })
         }
 
