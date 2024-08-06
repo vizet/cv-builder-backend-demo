@@ -43,7 +43,7 @@ export class PaymentService {
             "_id": userId
           },
           tax: {
-            validate_location: "immediately"
+            validate_location: "deferred"
           }
         })
       }
