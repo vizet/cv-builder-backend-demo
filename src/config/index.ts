@@ -9,6 +9,10 @@ export default () => ({
     apiKey: process.env.SENDGRID_API_KEY,
     emailFrom: process.env.SENDGRID_EMAIL_FROM,
     emailFromName: "CVwisely",
+    unsubscribeAsm: {
+        group_id: 65084,
+        groups_to_display: [65084, 65076]
+    },
     templates: {
       en: {
         emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_CONFIRM,
@@ -45,6 +49,114 @@ export default () => ({
         emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_TR_ACCOUNT_INITIAL_PAYMENT,
         emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_TR_REMINDER_1ST,
         emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_TR_REMINDER_2ST
+      },
+      pt: {
+        emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_PT_CONFIRM,
+        emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_PT_CONTACT_US,
+        emailRecoveryPassword: process.env.SENDGRID_TEMPLATE_EMAIL_PT_RECOVERY_PASSWORD,
+        emailRecoveryPasswordSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_PT_RECOVERY_PASSWORD_SUCCESSFUL,
+        emailSignUpWithEmailSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_PT_SIGNUP_WITH_EMAIL_SUCCESSFUL,
+        emailSignUpWithGoogleSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_PT_SIGNUP_WITH_GOOGLE_SUCCESSFUL,
+        emailAccountSubscriptionCancelation: process.env.SENDGRID_TEMPLATE_EMAIL_PT_ACCOUNT_SUBSCRIPTION_CANCELATION,
+        emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_PT_ACCOUNT_INITIAL_PAYMENT,
+        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_PT_REMINDER_1ST,
+        emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_PT_REMINDER_2ST
+      },
+      bg: {
+        emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_BG_CONFIRM,
+        emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_BG_CONTACT_US,
+        emailRecoveryPassword: process.env.SENDGRID_TEMPLATE_EMAIL_BG_RECOVERY_PASSWORD,
+        emailRecoveryPasswordSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_BG_RECOVERY_PASSWORD_SUCCESSFUL,
+        emailSignUpWithEmailSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_BG_SIGNUP_WITH_EMAIL_SUCCESSFUL,
+        emailSignUpWithGoogleSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_BG_SIGNUP_WITH_GOOGLE_SUCCESSFUL,
+        emailAccountSubscriptionCancelation: process.env.SENDGRID_TEMPLATE_EMAIL_BG_ACCOUNT_SUBSCRIPTION_CANCELATION,
+        emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_BG_ACCOUNT_INITIAL_PAYMENT,
+        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_BG_REMINDER_1ST,
+        emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_BG_REMINDER_2ST
+      },
+      fi: {
+        emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_FI_CONFIRM,
+        emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_FI_CONTACT_US,
+        emailRecoveryPassword: process.env.SENDGRID_TEMPLATE_EMAIL_FI_RECOVERY_PASSWORD,
+        emailRecoveryPasswordSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_FI_RECOVERY_PASSWORD_SUCCESSFUL,
+        emailSignUpWithEmailSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_FI_SIGNUP_WITH_EMAIL_SUCCESSFUL,
+        emailSignUpWithGoogleSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_FI_SIGNUP_WITH_GOOGLE_SUCCESSFUL,
+        emailAccountSubscriptionCancelation: process.env.SENDGRID_TEMPLATE_EMAIL_FI_ACCOUNT_SUBSCRIPTION_CANCELATION,
+        emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_FI_ACCOUNT_INITIAL_PAYMENT,
+        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_FI_REMINDER_1ST,
+        emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_FI_REMINDER_2ST
+      },
+      sv: {
+        emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_SV_CONFIRM,
+        emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_SV_CONTACT_US,
+        emailRecoveryPassword: process.env.SENDGRID_TEMPLATE_EMAIL_SV_RECOVERY_PASSWORD,
+        emailRecoveryPasswordSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_SV_RECOVERY_PASSWORD_SUCCESSFUL,
+        emailSignUpWithEmailSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_SV_SIGNUP_WITH_EMAIL_SUCCESSFUL,
+        emailSignUpWithGoogleSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_SV_SIGNUP_WITH_GOOGLE_SUCCESSFUL,
+        emailAccountSubscriptionCancelation: process.env.SENDGRID_TEMPLATE_EMAIL_SV_ACCOUNT_SUBSCRIPTION_CANCELATION,
+        emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_SV_ACCOUNT_INITIAL_PAYMENT,
+        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_SV_REMINDER_1ST,
+        emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_SV_REMINDER_2ST
+      },
+      no: {
+        emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_NO_CONFIRM,
+        emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_NO_CONTACT_US,
+        emailRecoveryPassword: process.env.SENDGRID_TEMPLATE_EMAIL_NO_RECOVERY_PASSWORD,
+        emailRecoveryPasswordSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_NO_RECOVERY_PASSWORD_SUCCESSFUL,
+        emailSignUpWithEmailSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_NO_SIGNUP_WITH_EMAIL_SUCCESSFUL,
+        emailSignUpWithGoogleSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_NO_SIGNUP_WITH_GOOGLE_SUCCESSFUL,
+        emailAccountSubscriptionCancelation: process.env.SENDGRID_TEMPLATE_EMAIL_NO_ACCOUNT_SUBSCRIPTION_CANCELATION,
+        emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_NO_ACCOUNT_INITIAL_PAYMENT,
+        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_NO_REMINDER_1ST,
+        emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_NO_REMINDER_2ST
+      },
+      hu: {
+        emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_HU_CONFIRM,
+        emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_HU_CONTACT_US,
+        emailRecoveryPassword: process.env.SENDGRID_TEMPLATE_EMAIL_HU_RECOVERY_PASSWORD,
+        emailRecoveryPasswordSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_HU_RECOVERY_PASSWORD_SUCCESSFUL,
+        emailSignUpWithEmailSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_HU_SIGNUP_WITH_EMAIL_SUCCESSFUL,
+        emailSignUpWithGoogleSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_HU_SIGNUP_WITH_GOOGLE_SUCCESSFUL,
+        emailAccountSubscriptionCancelation: process.env.SENDGRID_TEMPLATE_EMAIL_HU_ACCOUNT_SUBSCRIPTION_CANCELATION,
+        emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_HU_ACCOUNT_INITIAL_PAYMENT,
+        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_HU_REMINDER_1ST,
+        emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_HU_REMINDER_2ST
+      },
+      de: {
+        emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_DE_CONFIRM,
+        emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_DE_CONTACT_US,
+        emailRecoveryPassword: process.env.SENDGRID_TEMPLATE_EMAIL_DE_RECOVERY_PASSWORD,
+        emailRecoveryPasswordSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_DE_RECOVERY_PASSWORD_SUCCESSFUL,
+        emailSignUpWithEmailSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_DE_SIGNUP_WITH_EMAIL_SUCCESSFUL,
+        emailSignUpWithGoogleSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_DE_SIGNUP_WITH_GOOGLE_SUCCESSFUL,
+        emailAccountSubscriptionCancelation: process.env.SENDGRID_TEMPLATE_EMAIL_DE_ACCOUNT_SUBSCRIPTION_CANCELATION,
+        emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_DE_ACCOUNT_INITIAL_PAYMENT,
+        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_DE_REMINDER_1ST,
+        emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_DE_REMINDER_2ST
+      },
+      fr: {
+        emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_FR_CONFIRM,
+        emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_FR_CONTACT_US,
+        emailRecoveryPassword: process.env.SENDGRID_TEMPLATE_EMAIL_FR_RECOVERY_PASSWORD,
+        emailRecoveryPasswordSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_FR_RECOVERY_PASSWORD_SUCCESSFUL,
+        emailSignUpWithEmailSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_FR_SIGNUP_WITH_EMAIL_SUCCESSFUL,
+        emailSignUpWithGoogleSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_FR_SIGNUP_WITH_GOOGLE_SUCCESSFUL,
+        emailAccountSubscriptionCancelation: process.env.SENDGRID_TEMPLATE_EMAIL_FR_ACCOUNT_SUBSCRIPTION_CANCELATION,
+        emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_FR_ACCOUNT_INITIAL_PAYMENT,
+        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_FR_REMINDER_1ST,
+        emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_FR_REMINDER_2ST
+      },
+      hr: {
+        emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_HR_CONFIRM,
+        emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_HR_CONTACT_US,
+        emailRecoveryPassword: process.env.SENDGRID_TEMPLATE_EMAIL_HR_RECOVERY_PASSWORD,
+        emailRecoveryPasswordSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_HR_RECOVERY_PASSWORD_SUCCESSFUL,
+        emailSignUpWithEmailSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_HR_SIGNUP_WITH_EMAIL_SUCCESSFUL,
+        emailSignUpWithGoogleSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_HR_SIGNUP_WITH_GOOGLE_SUCCESSFUL,
+        emailAccountSubscriptionCancelation: process.env.SENDGRID_TEMPLATE_EMAIL_HR_ACCOUNT_SUBSCRIPTION_CANCELATION,
+        emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_HR_ACCOUNT_INITIAL_PAYMENT,
+        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_HR_REMINDER_1ST,
+        emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_HR_REMINDER_2ST
       }
     }
   },
