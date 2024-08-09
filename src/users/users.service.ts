@@ -52,30 +52,30 @@ export class UsersService {
     }
   }
 
-  @Cron(CronExpression.EVERY_2_HOURS)
-  async sendReminder2st() {
-    try {
-      const tenDaysAgo = new Date()
-      tenDaysAgo.setDate(tenDaysAgo.getDate() - 10)
+  // @Cron(CronExpression.EVERY_2_HOURS)
+  // async sendReminder2st() {
+  //   try {
+  //     const tenDaysAgo = new Date()
+  //     tenDaysAgo.setDate(tenDaysAgo.getDate() - 10)
 
-      const users = await this.userModel.find({"subscription.isActive": false, $or: [
-        {lastSendedReminder2stEmail: {$lt: tenDaysAgo}},
-        {lastSendedReminder2stEmail: null}
-      ]})
+  //     const users = await this.userModel.find({"subscription.isActive": false, $or: [
+  //       {lastSendedReminder2stEmail: {$lt: tenDaysAgo}},
+  //       {lastSendedReminder2stEmail: null}
+  //     ]})
 
-      const promises = []
-      const promisesUpdate = []
-      for (const user of users) {
-        promises.push(this.email.sendReminder2stEmail({email: user.email, name: user.fullName, locale: user.country}))
-        promisesUpdate.push(user.updateOne({lastSendedReminder2stEmail: new Date()}))
-      }
+  //     const promises = []
+  //     const promisesUpdate = []
+  //     for (const user of users) {
+  //       promises.push(this.email.sendReminder2stEmail({email: user.email, name: user.fullName, locale: user.country}))
+  //       promisesUpdate.push(user.updateOne({lastSendedReminder2stEmail: new Date()}))
+  //     }
 
-      Promise.all(promises)
-      Promise.all(promisesUpdate)
-    } catch (err) {
-      console.error(err)
-    }
-  }
+  //     Promise.all(promises)
+  //     Promise.all(promisesUpdate)
+  //   } catch (err) {
+  //     console.error(err)
+  //   }
+  // }
 
   async create(
     input: {
