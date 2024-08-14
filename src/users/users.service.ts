@@ -102,7 +102,8 @@ export class UsersService {
         password: input.password,
         avatar: input.avatar,
         firstName: input.firstName,
-        lastName: input.lastName
+        lastName: input.lastName,
+        country: input.country
       }).save()
 
       return omit(newUser.toObject(), [
