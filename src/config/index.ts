@@ -86,17 +86,17 @@ export default () => ({
         emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_FI_REMINDER_1ST,
         emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_FI_REMINDER_2ST
       },
-      sv: {
-        emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_SV_CONFIRM,
-        emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_SV_CONTACT_US,
-        emailRecoveryPassword: process.env.SENDGRID_TEMPLATE_EMAIL_SV_RECOVERY_PASSWORD,
-        emailRecoveryPasswordSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_SV_RECOVERY_PASSWORD_SUCCESSFUL,
-        emailSignUpWithEmailSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_SV_SIGNUP_WITH_EMAIL_SUCCESSFUL,
-        emailSignUpWithGoogleSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_SV_SIGNUP_WITH_GOOGLE_SUCCESSFUL,
-        emailAccountSubscriptionCancelation: process.env.SENDGRID_TEMPLATE_EMAIL_SV_ACCOUNT_SUBSCRIPTION_CANCELATION,
-        emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_SV_ACCOUNT_INITIAL_PAYMENT,
-        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_SV_REMINDER_1ST,
-        emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_SV_REMINDER_2ST
+      se: {
+        emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_SE_CONFIRM,
+        emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_SE_CONTACT_US,
+        emailRecoveryPassword: process.env.SENDGRID_TEMPLATE_EMAIL_SE_RECOVERY_PASSWORD,
+        emailRecoveryPasswordSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_SE_RECOVERY_PASSWORD_SUCCESSFUL,
+        emailSignUpWithEmailSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_SE_SIGNUP_WITH_EMAIL_SUCCESSFUL,
+        emailSignUpWithGoogleSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_SE_SIGNUP_WITH_GOOGLE_SUCCESSFUL,
+        emailAccountSubscriptionCancelation: process.env.SENDGRID_TEMPLATE_EMAIL_SE_ACCOUNT_SUBSCRIPTION_CANCELATION,
+        emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_SE_ACCOUNT_INITIAL_PAYMENT,
+        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_SE_REMINDER_1ST,
+        emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_SE_REMINDER_2ST
       },
       no: {
         emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_NO_CONFIRM,
