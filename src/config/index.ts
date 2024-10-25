@@ -198,5 +198,8 @@ export default () => ({
     awsAccessKeySecret: process.env.AWS_ACCESS_KEY_SECRET,
     awsS3Region: process.env.AWS_S3_REGION,
     awsS3Bucket: process.env.AWS_S3_BUCKET
+  },
+  openai:{
+    apiKey: process.env.OPENAI_API_KEY
   }
 })
