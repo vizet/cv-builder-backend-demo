@@ -49,10 +49,21 @@ export class OpenAIService {
 
   async generateWorkExperienceSummaryText(
     language: string,
-    data: { company: string, workingTime: string, position: string }
+    data: { company?: string, workingTime?: number, position: string }
   ) {
-    const userContent = `I worked at company ${data.company} for ${data.workingTime} days as a ${data.position}. 
-      Write a short text about work experience in this company. Convert days to year without days`
+    const enteredData: string[] = []
+
+    if (data.company) {
+      enteredData.push(`company name: ${data.company}`)
+    }
+    
+    if (data.workingTime) {
+      enteredData.push(`working time in days: ${data.workingTime}`)
+    }
+
+    const userContent = ` 
+      Write a short text about my work experience, using the following information: i worked at position ${data.position}, ${enteredData.join(", ")}.
+      Convert days to year without days`
     const chatCompletion = await this.getAnswerCore({language, maxCharacters: this.DEFAULT_MAX_CHARACTERS_IN_ANSWER, userContent})
 
     return {
@@ -62,10 +73,24 @@ export class OpenAIService {
 
   async generateEducationSummaryText(
     language: string,
-    data: { institute: string, degree: string, location: string }
+    data: { institute?: string, degree?: string, location?: string, workingTime?: number }
   ) {
-    const userContent = `I studied at the ${data.institute} institute for the degree of ${data.degree} in ${data.location}. 
-      Write a short text about my education experience in this institute`
+    const enteredData: string[] = []
+    
+    if (data.institute) {
+      enteredData.push(`institute name: ${data.institute}`)
+    }
+    
+    if (data.location) {
+      enteredData.push(`location: ${data.location}`)
+    }
+    
+    if (data.workingTime) {
+      enteredData.push(`education time: ${data.workingTime} days`)
+    }
+
+    const userContent = `I studied at the institute for the degree of ${data.degree}, ${enteredData.join(", ")}. 
+      Write a short description about my education experience in this institute`
     const chatCompletion = await this.getAnswerCore({language, maxCharacters: this.DEFAULT_MAX_CHARACTERS_IN_ANSWER, userContent})
 
     return {
@@ -182,6 +207,21 @@ export class OpenAIService {
   ) {
     
     const userContent = `Write a short description about ${data.title}.`
+    const chatCompletion = await this.getAnswerCore({language, maxCharacters: this.DEFAULT_MAX_CHARACTERS_IN_ANSWER, userContent})
+
+    return {
+      data: JSON.parse(chatCompletion.choices[0].message.content || "{}")
+    }
+  }
+
+  async generateProfileSummaryText(
+    language: string,
+    data: {
+      position: string
+    }
+  ) {
+    
+    const userContent = `Write a 2-3 sentence summary about my profile, using the following information: ${data.position}. Write on my behalf.`
     const chatCompletion = await this.getAnswerCore({language, maxCharacters: this.DEFAULT_MAX_CHARACTERS_IN_ANSWER, userContent})
 
     return {
