@@ -206,6 +206,18 @@ export default () => ({
         emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_SK_REMINDER_1ST,
         emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_SK_REMINDER_2ST
       },
+      sl: { //SLOVAK name by IP detect
+        emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_SK_CONFIRM,
+        emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_SK_CONTACT_US,
+        emailRecoveryPassword: process.env.SENDGRID_TEMPLATE_EMAIL_SK_RECOVERY_PASSWORD,
+        emailRecoveryPasswordSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_SK_RECOVERY_PASSWORD_SUCCESSFUL,
+        emailSignUpWithEmailSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_SK_SIGNUP_WITH_EMAIL_SUCCESSFUL,
+        emailSignUpWithGoogleSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_SK_SIGNUP_WITH_GOOGLE_SUCCESSFUL,
+        emailAccountSubscriptionCancelation: process.env.SENDGRID_TEMPLATE_EMAIL_SK_ACCOUNT_SUBSCRIPTION_CANCELATION,
+        emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_SK_ACCOUNT_INITIAL_PAYMENT,
+        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_SK_REMINDER_1ST,
+        emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_SK_REMINDER_2ST
+      },
       cs: {
         emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_CS_CONFIRM,
         emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_CS_CONTACT_US,
