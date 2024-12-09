@@ -134,6 +134,18 @@ export default () => ({
         emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_DE_REMINDER_1ST,
         emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_DE_REMINDER_2ST
       },
+      at: {
+        emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_DE_CONFIRM,
+        emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_DE_CONTACT_US,
+        emailRecoveryPassword: process.env.SENDGRID_TEMPLATE_EMAIL_DE_RECOVERY_PASSWORD,
+        emailRecoveryPasswordSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_DE_RECOVERY_PASSWORD_SUCCESSFUL,
+        emailSignUpWithEmailSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_DE_SIGNUP_WITH_EMAIL_SUCCESSFUL,
+        emailSignUpWithGoogleSuccessful: process.env.SENDGRID_TEMPLATE_EMAIL_DE_SIGNUP_WITH_GOOGLE_SUCCESSFUL,
+        emailAccountSubscriptionCancelation: process.env.SENDGRID_TEMPLATE_EMAIL_DE_ACCOUNT_SUBSCRIPTION_CANCELATION,
+        emailAccountInitialPayment: process.env.SENDGRID_TEMPLATE_EMAIL_DE_ACCOUNT_INITIAL_PAYMENT,
+        emailReminder1st: process.env.SENDGRID_TEMPLATE_EMAIL_DE_REMINDER_1ST,
+        emailReminder2st: process.env.SENDGRID_TEMPLATE_EMAIL_DE_REMINDER_2ST
+      },
       fr: {
         emailConfirm: process.env.SENDGRID_TEMPLATE_EMAIL_FR_CONFIRM,
         emailContactUs: process.env.SENDGRID_TEMPLATE_EMAIL_FR_CONTACT_US,
