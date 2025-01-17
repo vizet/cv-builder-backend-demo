@@ -15,6 +15,7 @@ export class OpenAIService {
         {
           role: "assistant",
           content: `You are an assistant who helps to create perfect a cv resume on ${language} language.
+          You need use ${language} language.
           It is advisable not to exceed ${maxCharacters} characters.
           You can return answers in JSON format like '{ answer: <your answer here>}'`
         },
@@ -222,6 +223,21 @@ export class OpenAIService {
   ) {
     
     const userContent = `Write a 2-3 sentence summary about my profile, using the following information: ${data.position}. Write on my behalf.`
+    const chatCompletion = await this.getAnswerCore({language, maxCharacters: this.DEFAULT_MAX_CHARACTERS_IN_ANSWER, userContent})
+
+    return {
+      data: JSON.parse(chatCompletion.choices[0].message.content || "{}")
+    }
+  }
+  
+  async generateSkills(
+    language: string,
+    data: {
+      position: string
+    }
+  ) {
+    
+    const userContent = `Write 6 skills that I can add to my resume. My current position is: ${data.position}. Return responde as JSON array`
     const chatCompletion = await this.getAnswerCore({language, maxCharacters: this.DEFAULT_MAX_CHARACTERS_IN_ANSWER, userContent})
 
     return {
