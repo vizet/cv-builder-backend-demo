@@ -237,7 +237,7 @@ export class OpenAIService {
     }
   ) {
     
-    const userContent = `Write 6 skills that I can add to my resume. My current position is: ${data.position}. Return responde as JSON array`
+    const userContent = `Write 6 skills that I can add to my resume. Dont use long words. My current position is: ${data.position}. Return responde as JSON array`
     const chatCompletion = await this.getAnswerCore({language, maxCharacters: this.DEFAULT_MAX_CHARACTERS_IN_ANSWER, userContent})
 
     return {
