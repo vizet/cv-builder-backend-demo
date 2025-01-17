@@ -2,7 +2,7 @@ import {OpenAIService} from "./openai.service"
 import {Body, Controller, Post} from "@nestjs/common"
 import {Public} from "src/auth/auth.decorators"
 
-export type TSection = "workExperience" | "education" | "course" | "achievement" | "certificate" | "extraActivitie" | "intership" | "customField" | "profile"
+export type TSection = "workExperience" | "education" | "course" | "achievement" | "certificate" | "extraActivitie" | "intership" | "customField" | "profile" | "skills"
 
 @Controller()
 export class OpenAIController {
@@ -88,6 +88,14 @@ export class OpenAIController {
           body.language,
           body.data as Parameters<
             typeof this.openAIService.generateProfileSummaryText
+          >[1]
+        )
+      
+      case "skills":
+        return this.openAIService.generateSkills(
+          body.language,
+          body.data as Parameters<
+            typeof this.openAIService.generateSkills
           >[1]
         )
 
