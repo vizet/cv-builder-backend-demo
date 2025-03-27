@@ -47,7 +47,7 @@ export class EmailService {
       const templateWithLocale = this.configService.get("sendGrid.templates.en.emailContactUs")
 
       const res = await sgMail.send({
-        to: "alexey.bagishev.dev@gmail.com",
+        to: this.configService.get("sendGrid.emailFrom"),
         from: {
           email: this.configService.get("sendGrid.emailFrom"),
           name: this.configService.get("sendGrid.emailFromName")
