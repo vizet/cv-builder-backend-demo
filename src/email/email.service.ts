@@ -46,7 +46,7 @@ export class EmailService {
     try {
       const templateWithLocale = this.configService.get("sendGrid.templates.en.emailContactUs")
 
-      await sgMail.send({
+      const res = await sgMail.send({
         to: this.configService.get("sendGrid.emailFrom"),
         from: {
           email: this.configService.get("sendGrid.emailFrom"),
@@ -58,6 +58,8 @@ export class EmailService {
         },
         asm: this.configService.get("sendGrid.unsubscribeAsm")
       })
+
+      console.log({res})
     } catch (err) {
       console.error(err)
     }
