@@ -47,9 +47,11 @@ export class EmailService {
       const templateWithLocale = this.configService.get("sendGrid.templates.en.emailContactUs")
 
       const res = await sgMail.send({
-        to: "support@cvwisely.com",
+        // to: "support@cvwisely.com",
+        // to: "support@cvwiselycom.helpscoutapp.com",
+        to: "alexey.bagishev.dev@gmail.com",
         from: {
-          email: "no-reply@cvwisely.com"
+          email: "support@cvwisely.com"
         },
         templateId: templateWithLocale,
         dynamicTemplateData: {
