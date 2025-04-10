@@ -48,7 +48,8 @@ export class EmailService {
 
       const res = await sgMail.send({
         // to: "support@cvwisely.com",
-        to: "support@cvwiselycom.helpscoutapp.com",
+        // to: "support@cvwiselycom.helpscoutapp.com",
+        to: "alexey.bagishev.dev@gmail.com",
         from: {
           email: "support@cvwisely.com"
         },
