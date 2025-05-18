@@ -33,16 +33,15 @@ export class UsersService {
       const fiveDaysAgo = new Date()
       fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5)
 
-      const users = await this.userModel.find({"subscription.isActive": false, $or: [
-        {lastSendedReminder1stEmail: {$lt: fiveDaysAgo}},
-        {lastSendedReminder1stEmail: null}
+      const users = await this.userModel.find({"subscription.isActive": false, $and: [
+        {lastSendedReminder1stEmail: {$lt: fiveDaysAgo}}
       ]})
 
       const promises = []
       const promisesUpdate = []
       for (const user of users) {
         promises.push(this.email.sendReminder1stEmail({email: user.email, name: user.fullName, locale: user.country}))
-        promisesUpdate.push(user.updateOne({lastSendedReminder1stEmail: new Date()}))
+        promisesUpdate.push(user.updateOne({lastSendedReminder1stEmail: null}))
       }
 
       Promise.all(promises)
