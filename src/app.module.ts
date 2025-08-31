@@ -13,6 +13,7 @@ import {PaymentModule} from "src/payment/payment.module"
 import {ResumeModule} from "src/resume/resume.module"
 import {UsersModule} from "src/users/users.module"
 import {StorageModule} from "./storage/storage.module"
+import {OpenAIModule} from "./openai/openai.module"
 
 @Module({
   imports: [
@@ -42,7 +43,8 @@ import {StorageModule} from "./storage/storage.module"
     UsersModule,
     ResumeModule,
     PaymentModule,
-    StorageModule
+    StorageModule,
+    OpenAIModule
   ],
   controllers: [AppController],
   providers: [

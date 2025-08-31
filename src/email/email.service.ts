@@ -46,11 +46,12 @@ export class EmailService {
     try {
       const templateWithLocale = this.configService.get("sendGrid.templates.en.emailContactUs")
 
-      await sgMail.send({
-        to: this.configService.get("sendGrid.emailFrom"),
+      const res = await sgMail.send({
+        // to: "support@cvwisely.com",
+        to: "support@cvwiselycom.helpscoutapp.com",
+        // to: "alexey.bagishev.dev@gmail.com",
         from: {
-          email: this.configService.get("sendGrid.emailFrom"),
-          name: this.configService.get("sendGrid.emailFromName")
+          email: "support@cvwisely.com"
         },
         templateId: templateWithLocale,
         dynamicTemplateData: {
@@ -58,6 +59,8 @@ export class EmailService {
         },
         asm: this.configService.get("sendGrid.unsubscribeAsm")
       })
+
+      console.log({res})
     } catch (err) {
       console.error(err)
     }
