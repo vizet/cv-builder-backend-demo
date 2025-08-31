@@ -14,6 +14,7 @@ import * as countriesCurrency from "./countriesCurrency.json"
 @Injectable()
 export class PaymentService {
   private stripe: Stripe
+  private static buyLocks = new Set<string>()
 
   constructor(
     configService: ConfigService,
@@ -22,6 +23,33 @@ export class PaymentService {
     private emailService: EmailService
   ) {
     this.stripe = new Stripe(configService.get("stripe.secretKey"))
+  }
+
+  private makeKey(userId: string, action: string, priceId?: string) {
+    return [userId, action, priceId || ""].filter(Boolean).join(":")
+  }
+
+  private async withUserLock<T>(userId: string, fn: () => Promise<T>): Promise<T> {
+    const wait = async () => {
+      const maxWaitMs = 10000
+      const step = 50
+      let waited = 0
+
+      while (PaymentService.buyLocks.has(userId)) {
+        if (waited >= maxWaitMs) break
+        await new Promise(res => setTimeout(res, step))
+        waited += step
+      }
+    }
+
+    await wait()
+    PaymentService.buyLocks.add(userId)
+
+    try {
+      return await fn()
+    } finally {
+      PaymentService.buyLocks.delete(userId)
+    }
   }
 
   private async getCustomerId(
@@ -156,142 +184,198 @@ export class PaymentService {
     userId: string,
     setupIntentId?: string
   ) {
-    try {
-      const user = await this.usersService.findOne({userId}, {
-        pickCustomerId: true,
-        pickSubscriptionData: true
-      })
+    return this.withUserLock(userId, async () => {
+      try {
+        const user = await this.usersService.findOne({userId}, {
+          pickCustomerId: true,
+          pickSubscriptionData: true
+        })
 
-      const customer = await this.getCustomer(userId)
+        const customer = await this.getCustomer(userId)
 
-      if (setupIntentId) {
-        try {
-          const intent = await this.stripe.setupIntents.retrieve(setupIntentId)
+        if (setupIntentId) {
+          try {
+            const intent = await this.stripe.setupIntents.retrieve(setupIntentId)
 
-          if (intent.status !== "succeeded" || intent.customer !== customer.id) {
+            if (intent.status !== "succeeded" || intent.customer !== customer.id) {
+              throw new BadRequestException("Invalid setup intent")
+            }
+          } catch {
             throw new BadRequestException("Invalid setup intent")
           }
-        } catch {
-          throw new BadRequestException("Invalid setup intent")
         }
-      }
 
-      const paymentMethods = await this.stripe.customers.listPaymentMethods(customer.id)
-      const prices = await this.getPricing(userId)
-      const lastPaymentMethod = paymentMethods.data.sort((a, b) => b.created - a.created)[0]
+        const paymentMethods = await this.stripe.customers.listPaymentMethods(customer.id)
+        const prices = await this.getPricing(userId)
+        const lastPaymentMethod = paymentMethods.data.sort((a, b) => b.created - a.created)[0]
 
-      await this.stripe.customers.update(customer.id, {
-        invoice_settings: {
-          default_payment_method: lastPaymentMethod.id
-        }
-      })
-
-      const trialEnded = user.subscription.trialExpiryDate && (
-        user.subscription.trialExpiryDate.getTime() <= new Date().getTime()
-      )
-      const futureTimestamp = Math.floor((Date.now() + 1000 * 60 * 60 * 24 * prices.trial.period) / 1000)
-
-      let paidInvoice: Stripe.Response<Stripe.Invoice> = null
-      let subscription: Stripe.Response<Stripe.Subscription>
-
-      if (!user.subscription.subscriptionId) {
-        const invoice = await this.stripe.invoices.create({
-          customer: customer.id,
-          currency: prices.currency,
-          default_payment_method: lastPaymentMethod.id,
-          automatic_tax: {
-            enabled: true
+        await this.stripe.customers.update(customer.id, {
+          invoice_settings: {
+            default_payment_method: lastPaymentMethod?.id
           }
         })
 
-        await this.stripe.invoiceItems.create({
-          invoice: invoice.id,
+        const trialEnded = user.subscription.trialExpiryDate && (
+          user.subscription.trialExpiryDate.getTime() <= new Date().getTime()
+        )
+        const futureTimestamp = Math.floor((Date.now() + 1000 * 60 * 60 * 24 * prices.trial.period) / 1000)
+
+        let paidInvoice: Stripe.Response<Stripe.Invoice> = null
+        let subscription: Stripe.Subscription
+
+        const existingSubs = await this.stripe.subscriptions.list({
           customer: customer.id,
-          currency: prices.currency,
-          price: prices.trial.id
+          status: "all",
+          limit: 100
         })
 
-        await this.stripe.invoices.finalizeInvoice(invoice.id)
+        const samePriceSub = existingSubs.data
+          .sort((a, b) => b.created - a.created)
+          .find(s => s.items?.data?.some(item => item.price?.id === prices.subscription.id))
 
-        paidInvoice = await this.stripe.invoices.pay(invoice.id)
-        subscription = await this.stripe.subscriptions.create({
-          customer: customer.id,
-          currency: prices.currency,
-          items: [{price: prices.subscription.id}],
-          billing_cycle_anchor: futureTimestamp,
-          trial_end: futureTimestamp,
-          automatic_tax: {
-            enabled: true
+        if (!user.subscription.subscriptionId) {
+          if (samePriceSub) {
+            subscription = samePriceSub
+
+            if (["active", "trialing"].includes(subscription.status) && subscription.cancel_at) {
+              subscription = await this.stripe.subscriptions.update(subscription.id, {
+                cancel_at: null
+              })
+            }
+
+            await this.usersService.updateSubscription(userId, {
+              subscriptionId: subscription.id,
+              isActive: ["active", "trialing"].includes(subscription.status),
+              canceled: false,
+              trialExpiryDate: subscription.status === "trialing" && subscription.trial_end
+                ? new Date(subscription.trial_end * 1000)
+                : user.subscription.trialExpiryDate
+            })
+          } else {
+            const invoice = await this.stripe.invoices.create({
+              customer: customer.id,
+              currency: prices.currency,
+              default_payment_method: lastPaymentMethod?.id,
+              automatic_tax: {
+                enabled: true
+              }
+            }, {
+              idempotencyKey: this.makeKey(userId, "trial-invoice", prices.trial.id)
+            })
+
+            await this.stripe.invoiceItems.create({
+              invoice: invoice.id,
+              customer: customer.id,
+              currency: prices.currency,
+              price: prices.trial.id
+            }, {
+              idempotencyKey: this.makeKey(userId, "trial-invoice-item", prices.trial.id)
+            })
+
+            await this.stripe.invoices.finalizeInvoice(invoice.id, {
+              idempotencyKey: this.makeKey(userId, "trial-invoice-finalize", prices.trial.id)
+            })
+
+            paidInvoice = await this.stripe.invoices.pay(invoice.id, {
+              idempotencyKey: this.makeKey(userId, "trial-invoice-pay", prices.trial.id)
+            })
+
+            subscription = await this.stripe.subscriptions.create({
+              customer: customer.id,
+              currency: prices.currency,
+              items: [{price: prices.subscription.id}],
+              billing_cycle_anchor: futureTimestamp,
+              trial_end: futureTimestamp,
+              automatic_tax: {
+                enabled: true
+              }
+            }, {
+              idempotencyKey: this.makeKey(userId, "create-subscription", prices.subscription.id)
+            })
+
+            await this.usersService.updateSubscription(userId, {
+              subscriptionId: subscription.id,
+              isActive: true,
+              canceled: false,
+              trialExpiryDate: new Date(futureTimestamp * 1000)
+            })
+
+            const currencySymbol = countriesCurrency[prices.currency.toUpperCase()]?.symbol_native || "$"
+            const price = `${currencySymbol}${prices.subscription.amount}`
+            const trialExpiryDate = format(new Date(futureTimestamp * 1000), "dd MMM yyyy")
+
+            await this.emailService.sendAccountInitialPaymentEmail({
+              email: user.email,
+              name: user.fullName,
+              trialPeriod: prices.trial.period,
+              price,
+              trialExpiresDate: trialExpiryDate
+            }, user.country)
           }
-        })
-
-        await this.usersService.updateSubscription(userId, {
-          subscriptionId: subscription.id,
-          isActive: true,
-          canceled: false,
-          trialExpiryDate: new Date(futureTimestamp * 1000)
-        })
-
-        const currencySymbol = countriesCurrency[prices.currency.toUpperCase()]?.symbol_native || "$"
-        const price = `${currencySymbol}${prices.subscription.amount}`
-        const trialExpiryDate = format(new Date(futureTimestamp * 1000), "dd MMM yyyy")
-
-        await this.emailService.sendAccountInitialPaymentEmail({
-          email: user.email,
-          name: user.fullName,
-          trialPeriod: prices.trial.period,
-          price,
-          trialExpiresDate: trialExpiryDate
-        }, user.country)
-      } else {
-        subscription = await this.stripe.subscriptions.retrieve(user.subscription.subscriptionId)
-
-        if (["active", "trialing"].includes(subscription.status) && subscription.cancel_at) {
-          subscription = await this.stripe.subscriptions.update(subscription.id, {
-            cancel_at: null
-          })
         } else {
-          subscription = await this.stripe.subscriptions.create({
-            customer: customer.id,
-            currency: prices.currency,
-            items: [{price: prices.subscription.id}],
-            automatic_tax: {
-              enabled: true
+          subscription = await this.stripe.subscriptions.retrieve(user.subscription.subscriptionId)
+
+          if (["active", "trialing"].includes(subscription.status)) {
+            if (subscription.cancel_at) {
+              subscription = await this.stripe.subscriptions.update(subscription.id, {
+                cancel_at: null
+              })
             }
+          } else {
+            if (samePriceSub && samePriceSub.id !== subscription.id) {
+              subscription = samePriceSub
+
+              if (subscription.cancel_at) {
+                subscription = await this.stripe.subscriptions.update(subscription.id, {
+                  cancel_at: null
+                })
+              }
+            } else {
+              subscription = await this.stripe.subscriptions.create({
+                customer: customer.id,
+                currency: prices.currency,
+                items: [{price: prices.subscription.id}],
+                automatic_tax: {
+                  enabled: true
+                }
+              }, {
+                idempotencyKey: this.makeKey(userId, "create-subscription", prices.subscription.id)
+              })
+            }
+          }
+
+          await this.usersService.updateSubscription(userId, {
+            subscriptionId: subscription.id,
+            isActive: ["active", "trialing"].includes(subscription.status),
+            canceled: false
           })
         }
 
-        await this.usersService.updateSubscription(userId, {
-          subscriptionId: subscription.id,
-          isActive: true,
-          canceled: false
-        })
-      }
-
-      return {
-        success: true,
-        data: {
-          transaction_id: trialEnded ? subscription.latest_invoice : paidInvoice?.payment_intent,
-          currency: prices.currency,
-          value: trialEnded ? parseFloat(prices.subscription.amount) : paidInvoice?.amount_paid,
-          customer: {
-            id: customer.id,
-            customer_email: customer.email || "",
-            customer_name: customer.name || ""
-          },
-          items: [
-            {
-              item_id: trialEnded ? prices.subscription.id : prices.trial.id,
-              item_name: trialEnded ? "Subscription" : "Trial",
-              affiliation: paidInvoice?.account_name || "CVwisely.com"
-            }
-          ]
+        return {
+          success: true,
+          data: {
+            transaction_id: trialEnded ? subscription.latest_invoice : paidInvoice?.payment_intent,
+            currency: prices.currency,
+            value: trialEnded ? parseFloat(prices.subscription.amount) : paidInvoice?.amount_paid,
+            customer: {
+              id: customer.id,
+              customer_email: customer.email || "",
+              customer_name: customer.name || ""
+            },
+            items: [
+              {
+                item_id: trialEnded ? prices.subscription.id : prices.trial.id,
+                item_name: trialEnded ? "Subscription" : "Trial",
+                affiliation: paidInvoice?.account_name || "CVwisely.com"
+              }
+            ]
+          }
         }
+      } catch (err) {
+        console.error(err)
+        throw new BadRequestException("Something went wrong")
       }
-    } catch (err) {
-      console.error(err)
-      throw new BadRequestException("Something went wrong")
-    }
+    })
   }
 
   async checkSubscription(

@@ -1,6 +1,4 @@
 import {forwardRef, Module} from "@nestjs/common"
-import {ConfigService} from "@nestjs/config"
-import {JwtModule} from "@nestjs/jwt"
 import {PassportModule} from "@nestjs/passport"
 import {EmailModule} from "src/email/email.module"
 import {PaymentModule} from "src/payment/payment.module"

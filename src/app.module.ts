@@ -13,6 +13,7 @@ import {PaymentModule} from "src/payment/payment.module"
 import {ResumeModule} from "src/resume/resume.module"
 import {UsersModule} from "src/users/users.module"
 import {StorageModule} from "./storage/storage.module"
+
 @Module({
   imports: [
     ScheduleModule.forRoot(),
